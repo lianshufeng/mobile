@@ -1,0 +1,6 @@
+{
+    "name" : "HotUpdate",
+    "version" : "1.0.0",
+    "author": "练书锋",
+    "description": "cordova的热更新"
+}

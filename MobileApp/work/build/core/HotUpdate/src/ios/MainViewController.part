@@ -1,0 +1,88 @@
+//----------------开始修改
+- (void)viewDidLoad
+{
+    //启动
+    [super viewDidLoad];
+    //禁止下来出现空白
+    super.webView.scrollView.bounces=NO;
+    //空出状态栏
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7) {
+        CGRect viewBounds = [super.webView bounds];
+        viewBounds.origin.y = 20;
+        viewBounds.size.height = viewBounds.size.height - 20;
+        super.webView.frame = viewBounds;
+    }
+    //弹出提示正在加载，防止ios8系统闪退APP的情况
+    //[self showLoadTips:nil];
+    //资源版本的检测
+    [ NSThread detachNewThreadSelector:@selector(startInitRes) toTarget:self withObject:nil];
+}
+//显示加载提示提示
+-(void) showLoadTips:(UIAlertView *) closeAlert{
+    if(closeAlert){
+        [closeAlert dismissWithClickedButtonIndex:[closeAlert cancelButtonIndex] animated:YES];
+    }else{
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil message:@"加载中，请稍后。。。" delegate:nil cancelButtonTitle:nil otherButtonTitles:nil,nil];
+        [alert show];
+        [self performSelector:@selector(showLoadTips:) withObject:alert afterDelay:1.0f];
+    }
+}
+//替换父类的取url的方法
+- (NSURL*)appUrl
+{
+    return  [NSURL fileURLWithPath:[UpdateRes getLaunchUrl]];
+}
+//检查并修改是否需要初始化资源
+- (void) startInitRes{
+    //检查是否初始化安装
+    [UpdateRes initRes];
+    //同步服务器资源
+    [self startUpdateRes];
+}
+//启动线程增量检查资源增量更新
+-(void) startUpdateRes{
+    @try {
+        //执行检查时候有新的资源
+        NSArray * resArray = [UpdateRes updateRes];
+        if(resArray!=nil && resArray.count>0){
+            NSString * msg = [@"已更新 " stringByAppendingString:[NSString stringWithFormat:@"%d",resArray.count]];
+            NSLog(@"%@" ,resArray);
+            msg = [msg stringByAppendingString:@" 个资源，部分功能需要重新加载后生效，是否重载？"];
+            [self performSelectorOnMainThread:@selector(showCloseTips:)withObject:msg waitUntilDone:YES];
+        }
+    }
+    @catch (NSException *exception) {
+        
+    }
+    @finally {
+        
+    }
+}
+//ui线程安全
+-(void) showCloseTips:(NSString*) msg {
+    //提示更新成功
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"" message:msg delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确认",nil];
+    alert.tag=7758;
+    [alert show];
+}
+//信息框事件
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    switch (alertView.tag) {
+        case 7758:
+            if(buttonIndex==1){
+                NSURLRequest* appReq = [NSURLRequest requestWithURL:[self appUrl] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20.0];
+                [[self webViewEngine] loadRequest:appReq ];
+            }
+            break;
+        default:
+            break;
+    }
+}
+//app被唤醒的事件
+- (void)onAppWillEnterForeground:(NSNotification*)notification
+{
+    [ NSThread detachNewThreadSelector:@selector(startUpdateRes) toTarget:self withObject:nil];
+    [self.commandDelegate evalJs:@"cordova.fireDocumentEvent('resume');"];
+}
+//---------修改完毕

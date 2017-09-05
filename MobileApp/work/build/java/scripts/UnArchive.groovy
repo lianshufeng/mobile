@@ -1,6 +1,6 @@
 import java.io.File;
 
-import com.bajie.project.core.util.archive.ArchiveUtil;
+import com.fast.dev.component.archive.ArchiveUtil;
 
 public class UnArchive {
 

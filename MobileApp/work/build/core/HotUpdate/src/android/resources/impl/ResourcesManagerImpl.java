@@ -1,4 +1,4 @@
-package com.zbj.mobile.hotupdate.resources.impl;
+package com.fast.dev.hotupdate.resources.impl;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,16 +19,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.fast.dev.hotupdate.resources.ResourcesManager;
+import com.fast.dev.hotupdate.resources.handle.CallBackHandler;
+import com.fast.dev.hotupdate.resources.model.UpdateListModel;
+import com.fast.dev.hotupdate.resources.type.CallBackType;
+import com.fast.dev.hotupdate.util.FileUtil;
+import com.fast.dev.hotupdate.util.HttpClient;
+import com.fast.dev.hotupdate.util.StreamUtils;
+import com.fast.dev.hotupdate.util.ZipUtil;
+import com.fast.dev.hotupdate.util.HttpClient.ResultBean;
 import com.google.common.io.ByteStreams;
-import com.zbj.mobile.hotupdate.resources.ResourcesManager;
-import com.zbj.mobile.hotupdate.resources.handle.CallBackHandler;
-import com.zbj.mobile.hotupdate.resources.model.UpdateListModel;
-import com.zbj.mobile.hotupdate.resources.type.CallBackType;
-import com.zbj.mobile.hotupdate.util.FileUtil;
-import com.zbj.mobile.hotupdate.util.HttpClient;
-import com.zbj.mobile.hotupdate.util.HttpClient.ResultBean;
-import com.zbj.mobile.hotupdate.util.StreamUtils;
-import com.zbj.mobile.hotupdate.util.ZipUtil;
 
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zbj.mobile.hotupdate.util;
+package com.fast.dev.hotupdate.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;

@@ -1,9 +1,9 @@
-package com.zbj.mobile.hotupdate;
+package com.fast.dev.hotupdate;
 
 import org.apache.cordova.CordovaActivity;
 
-import com.zbj.mobile.hotupdate.resources.ResourcesManager;
-import com.zbj.mobile.hotupdate.resources.impl.ResourcesManagerImpl;
+import com.fast.dev.hotupdate.resources.ResourcesManager;
+import com.fast.dev.hotupdate.resources.impl.ResourcesManagerImpl;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;

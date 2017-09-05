@@ -80,8 +80,11 @@ var addPluginZip = function(config){
 exports.add=function(config){
     //核心插件
     addPlugin(config.output,corePlugin(config));
-    //核心的webview，仅支持android
-    addPlugin(config.output,modulePath+'cordova-plugin-crosswalk-webview --variable XWALK_COMMANDLINE="--disable-pull-to-refresh-effect --ignore-gpu-blacklist"');
+    //按需加载crosswalk
+    if (config.app.crosswalk){
+        //仅支持android
+        addPlugin(config.output,modulePath+'cordova-plugin-crosswalk-webview --variable XWALK_COMMANDLINE="--disable-pull-to-refresh-effect --ignore-gpu-blacklist"');
+    }
     if (fs.existsSync(config.plugins)){
         if (fs.statSync(config.plugins).isDirectory()){
             //目录

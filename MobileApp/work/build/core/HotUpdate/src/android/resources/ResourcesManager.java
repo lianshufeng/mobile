@@ -1,4 +1,4 @@
-package com.zbj.mobile.hotupdate.resources;
+package com.fast.dev.hotupdate.resources;
 
 /**
  * 资源管理器

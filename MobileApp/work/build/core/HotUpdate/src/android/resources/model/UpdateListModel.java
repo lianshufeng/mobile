@@ -1,4 +1,4 @@
-package com.zbj.mobile.hotupdate.resources.model;
+package com.fast.dev.hotupdate.resources.model;
 
 import java.util.List;
 

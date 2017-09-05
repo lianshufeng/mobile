@@ -34,10 +34,14 @@ module.exports = function(context) {
     packageName = manifestXmlRoot.getroot().get('package');
     var mainActivityPath = path.join(androidSrcDir+'/'+replaceAll(packageName,'.','/'),'MainActivity.java');
     
+    var hotUpdateActivityPackage = [
+        'com','fast','dev','hotupdate'
+    ];
+    
     //原始代码
-    var codeContent = fs.readFileSync(path.join(androidSrcDir,'/com/zbj/mobile/hotupdate/HotUpdateActivity.java')).toString();
+    var codeContent = fs.readFileSync(path.join(androidSrcDir,'/'+hotUpdateActivityPackage.join('/')+'/HotUpdateActivity.java')).toString();
     //动态替换模版
-    codeContent = replaceAll(codeContent,'package com.zbj.mobile.demo;','package '+packageName+';');
+    codeContent = replaceAll(codeContent,'package '+hotUpdateActivityPackage.join('.')+';','package '+packageName+';');
     codeContent = replaceAll(codeContent,'HotUpdateActivity','MainActivity');
     
     //保存到源码里

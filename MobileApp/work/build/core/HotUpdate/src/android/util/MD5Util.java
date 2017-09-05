@@ -1,4 +1,4 @@
-package com.zbj.mobile.hotupdate.util;
+package com.fast.dev.hotupdate.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

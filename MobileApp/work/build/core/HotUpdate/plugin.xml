@@ -61,22 +61,22 @@ id="com.zbj.mobile.hotupdate" version="0.0.1">
         <source-file src="libs/android/ZipEntry.jar" target-dir="libs" />
        
         <!--拷贝java代码-->
-        <source-file src="src/android/HotUpdateActivity.java" target-dir="src/com/zbj/mobile/hotupdate" />
+        <source-file src="src/android/HotUpdateActivity.java" target-dir="src/com/fast/dev/hotupdate" />
         
         <!-- util-->
-        <source-file src="src/android/util/BytesUtil.java" target-dir="src/com/zbj/mobile/hotupdate/util" />
-        <source-file src="src/android/util/FileUtil.java" target-dir="src/com/zbj/mobile/hotupdate/util" />
-        <source-file src="src/android/util/HttpClient.java" target-dir="src/com/zbj/mobile/hotupdate/util" />
-        <source-file src="src/android/util/MD5Util.java" target-dir="src/com/zbj/mobile/hotupdate/util" />
-        <source-file src="src/android/util/StreamUtils.java" target-dir="src/com/zbj/mobile/hotupdate/util" />
-        <source-file src="src/android/util/ZipUtil.java" target-dir="src/com/zbj/mobile/hotupdate/util" />
+        <source-file src="src/android/util/BytesUtil.java" target-dir="src/com/fast/dev/hotupdate/util" />
+        <source-file src="src/android/util/FileUtil.java" target-dir="src/com/fast/dev/hotupdate/util" />
+        <source-file src="src/android/util/HttpClient.java" target-dir="src/com/fast/dev/hotupdate/util" />
+        <source-file src="src/android/util/MD5Util.java" target-dir="src/com/fast/dev/hotupdate/util" />
+        <source-file src="src/android/util/StreamUtils.java" target-dir="src/com/fast/dev/hotupdate/util" />
+        <source-file src="src/android/util/ZipUtil.java" target-dir="src/com/fast/dev/hotupdate/util" />
         
         <!-- resources -->
-        <source-file src="src/android/resources/ResourcesManager.java" target-dir="src/com/zbj/mobile/hotupdate/resources" />
-        <source-file src="src/android/resources/handle/CallBackHandler.java" target-dir="src/com/zbj/mobile/hotupdate/resources/handle" />
-        <source-file src="src/android/resources/impl/ResourcesManagerImpl.java" target-dir="src/com/zbj/mobile/hotupdate/resources/impl" />
-        <source-file src="src/android/resources/model/UpdateListModel.java" target-dir="src/com/zbj/mobile/hotupdate/resources/model" />
-        <source-file src="src/android/resources/type/CallBackType.java" target-dir="src/com/zbj/mobile/hotupdate/resources/type" />
+        <source-file src="src/android/resources/ResourcesManager.java" target-dir="src/com/fast/dev/hotupdate/resources" />
+        <source-file src="src/android/resources/handle/CallBackHandler.java" target-dir="src/com/fast/dev/hotupdate/resources/handle" />
+        <source-file src="src/android/resources/impl/ResourcesManagerImpl.java" target-dir="src/com/fast/dev/hotupdate/resources/impl" />
+        <source-file src="src/android/resources/model/UpdateListModel.java" target-dir="src/com/fast/dev/hotupdate/resources/model" />
+        <source-file src="src/android/resources/type/CallBackType.java" target-dir="src/com/fast/dev/hotupdate/resources/type" />
         
         
         <!--  update default MainActivity -->

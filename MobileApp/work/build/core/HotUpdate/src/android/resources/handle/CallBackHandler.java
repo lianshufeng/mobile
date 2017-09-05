@@ -1,9 +1,9 @@
-package com.zbj.mobile.hotupdate.resources.handle;
+package com.fast.dev.hotupdate.resources.handle;
 
 import org.apache.cordova.CordovaActivity;
 
-import com.zbj.mobile.hotupdate.resources.ResourcesManager;
-import com.zbj.mobile.hotupdate.resources.type.CallBackType;
+import com.fast.dev.hotupdate.resources.ResourcesManager;
+import com.fast.dev.hotupdate.resources.type.CallBackType;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;

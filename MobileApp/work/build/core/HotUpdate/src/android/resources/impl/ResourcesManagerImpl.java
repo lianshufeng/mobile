@@ -421,7 +421,8 @@ public class ResourcesManagerImpl extends ResourcesManager {
 					// 判断文件是否存在，保证一定会得到更新
 					File file = new File(targetPath + key);
 					if (file.exists()) {
-						if (!localHash.equalsIgnoreCase(remoteHash)) {
+						//避免字符串比较错误
+						if (Long.parseLong(localHash,16) != Long.parseLong(remoteHash,16) ) {
 							needUpdateList.add(key);
 						}
 					} else {

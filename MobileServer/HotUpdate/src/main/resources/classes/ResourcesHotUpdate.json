@@ -1,0 +1,20 @@
+{
+	"phone": {
+		"storePath": "/resources/app/",
+		"svnUrl": "http://106.75.176.4/svn/MobileApp/trunk/phone",
+		"userName": "WebAppReader",
+		"passWord": "WebAppReader251708339"
+	},
+	"phone2": {
+		"storePath": "/resources/app/",
+		"svnUrl": "http://106.75.176.4/svn/MobileApp/trunk/app2",
+		"userName": "WebAppReader",
+		"passWord": "WebAppReader251708339"
+	},
+	"phone3": {
+		"storePath": "/resources/app/",
+		"svnUrl": "http://106.75.176.4/svn/MobileApp/trunk/test3",
+		"userName": "WebAppReader",
+		"passWord": "WebAppReader251708339"
+	}
+}

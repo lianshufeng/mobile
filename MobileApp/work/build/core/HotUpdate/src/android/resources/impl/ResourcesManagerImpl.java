@@ -188,14 +188,14 @@ public class ResourcesManagerImpl extends ResourcesManager {
 
 
 	//拷贝JSON数组资源到缓存
-	private void copyJsonResToCache(JSONArray resArr,List<String> files , List<String> updateFiles) throws JSONException {
-		for (int i = 0; i < resArr.length(); i++) {
+	private void copyJsonResToCache(String resTypeName ,List<String> files , List<String> updateFiles) throws JSONException {
+		List<String> resArr= readAppResList(resTypeName);
+		for (int i = 0; i < resArr.size(); i++) {
 			String resName = FileUtil.format(String.valueOf(resArr.get(i)));
 			files.add(FileUtil.format("www" + "/" + resName));
 			updateFiles.add(resName.substring(0, 1).equals("/") ? resName.substring(1, resName.length())
 					: resName);
 		}
-
 	}
 
 
@@ -236,14 +236,10 @@ public class ResourcesManagerImpl extends ResourcesManager {
 					final List<String> files = new ArrayList<String>();
 					final List<String> updateFiles = new ArrayList<String>();
 					try {
-						byte[] bin = StreamUtils.copyToByteArray(context.getAssets().open("AssetsList.json"));
-						JSONObject jsonObject = new JSONObject(new String(bin));
 						//拷贝只读资源
-						JSONArray readOnlyArr = jsonObject.getJSONArray("readOnlyRes");
-						copyJsonResToCache(readOnlyArr,files,updateFiles);
+						copyJsonResToCache("readOnlyRes",files,updateFiles);
 						//拷贝读写资源
-						JSONArray readWriteArr = jsonObject.getJSONArray("readWriteRes");
-						copyJsonResToCache(readWriteArr,files,updateFiles);
+						copyJsonResToCache("readWriteRes",files,updateFiles);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -365,13 +361,35 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		FileUtils.writeByteArrayToFile(tmpFile, bin);
 		List<String> updateFiles = ZipUtil.unZipFile(tmpFile, wwwResources);
 		tmpFile.delete();
-		// 更新缓存资源
-		updateResCache(updateFiles);
 	}
 
 	/**
+	 * 读取app的资源
+	 * @param typeName
+	 * @return
+	 */
+	private List<String> readAppResList (String typeName)  {
+		List<String> res = null;
+		try{
+			res = new ArrayList<String>();
+			byte[] bin = StreamUtils.copyToByteArray(context.getAssets().open("AssetsList.json"));
+			JSONObject jsonObject = new JSONObject(new String(bin));
+			//拷贝只读资源
+			JSONArray readOnlyArr = jsonObject.getJSONArray(typeName);
+			for(int i = 0 ; i<readOnlyArr.length();i++){
+				res.add(readOnlyArr.getString(i));
+			}
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		return res;
+
+	}
+
+
+	/**
 	 * 开始更新
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws JSONException
 	 */
@@ -414,12 +432,15 @@ public class ResourcesManagerImpl extends ResourcesManager {
 				}
 			}
 
+			//获取只读文件列表
+			List<String> readOnlyRes = 	readAppResList("readOnlyRes");
 			// 计算得出没有被使用过的文件
 			Iterator<String> delList = filehash.keys();
 			List<String> dels = new ArrayList<String>();
 			while (delList.hasNext()) {
 				String delFile = delList.next();
-				if (!delFile.split("/")[0].equalsIgnoreCase("plugins") && delFile.toLowerCase().indexOf("cordova") == -1  ) {
+				delFile = delFile.substring(0,1).equals("/")?delFile:"/"+delFile;
+				if (!readOnlyRes.contains(delFile) ) {
 					dels.add(delFile);
 				}
 			}

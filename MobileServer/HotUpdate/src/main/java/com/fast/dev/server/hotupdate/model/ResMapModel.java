@@ -1,4 +1,4 @@
-package com.bajie.project.hotupdate.model;
+package com.fast.dev.server.hotupdate.model;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.bajie.project.hotupdate.controller;
+package com.fast.dev.server.hotupdate.controller;
 
 import org.springframework.stereotype.Controller;
 

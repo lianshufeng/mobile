@@ -1,26 +1,36 @@
-package com.bajie.project.hotupdate.model;
+package com.fast.dev.server.hotupdate.model;
 
 /**
- * 热更新配置
+ * 应用资源配置
  * 
  * @作者 练书锋
  * @联系 251708339@qq.com
  * @时间 2017年8月3日
  *
  */
-public class HotUpdateStore {
+public class AppResStore {
+
+	private String appId;
 
 	// APP的ID
 	private String storePath;
 
-	// SVN 地址
-	private String svnUrl;
+	// GIT 地址
+	private String gitUrl;
 
-	// SVN账号
+	// GIT账号
 	private String userName;
 
-	// Svn密码
+	// GIT密码
 	private String passWord;
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
 
 	public String getStorePath() {
 		return storePath;
@@ -30,12 +40,12 @@ public class HotUpdateStore {
 		this.storePath = storePath;
 	}
 
-	public String getSvnUrl() {
-		return svnUrl;
+	public String getGitUrl() {
+		return gitUrl;
 	}
 
-	public void setSvnUrl(String svnUrl) {
-		this.svnUrl = svnUrl;
+	public void setGitUrl(String gitUrl) {
+		this.gitUrl = gitUrl;
 	}
 
 	public String getUserName() {

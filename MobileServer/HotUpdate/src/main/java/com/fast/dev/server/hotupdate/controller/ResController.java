@@ -1,4 +1,4 @@
-package com.bajie.project.hotupdate.controller;
+package com.fast.dev.server.hotupdate.controller;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,39 +10,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.bajie.project.core.environments.ENVFactory;
-import com.bajie.project.core.environments.ENVModel;
-import com.bajie.project.core.model.ExceptionModel;
-import com.bajie.project.core.model.InvokerResult;
-import com.bajie.project.core.util.ResponseUtil;
-import com.bajie.project.core.util.net.UrlUtil;
-import com.bajie.project.hotupdate.service.ResManagerService;
+import com.fast.dev.core.environments.ENVFactory;
+import com.fast.dev.core.environments.ENVModel;
+import com.fast.dev.core.model.InvokerResult;
+import com.fast.dev.core.util.ResponseUtil;
+import com.fast.dev.core.util.net.UrlUtil;
+import com.fast.dev.server.hotupdate.service.ResManagerService;
 
 @RequestMapping("HotUpdate")
 public class ResController {
 
 	@Autowired
 	private ResManagerService resManagerService;
-
-	/**
-	 * 提交zip压缩资源的文件
-	 * 
-	 * @param appId
-	 * @param resFile
-	 * @return
-	 */
-//	@RequestMapping("publish.json")
-	public InvokerResult<Object> publish(String appId, MultipartFile resFile) {
-		try {
-			this.resManagerService.publish(appId, resFile.getInputStream());
-			return new InvokerResult<Object>("操作完成！");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new InvokerResult<Object>(new ExceptionModel(String.valueOf(e.getClass()), e.getMessage()));
-		}
-	}
 
 	@RequestMapping("update.json")
 	public InvokerResult<Object> update(String appId) throws Exception {

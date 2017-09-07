@@ -1,4 +1,4 @@
-package com.bajie.project.hotupdate.service.impl;
+package com.fast.dev.server.hotupdate.service.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,28 +10,24 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.tmatesoft.svn.core.SVNDepth;
-import org.tmatesoft.svn.core.SVNURL;
-import org.tmatesoft.svn.core.wc.SVNClientManager;
-import org.tmatesoft.svn.core.wc.SVNRevision;
 
-import com.bajie.project.core.util.ZipUtil;
-import com.bajie.project.core.util.archive.ArchiveUtil;
-import com.bajie.project.core.util.code.JsonUtil;
-import com.bajie.project.hotupdate.model.HotUpdateStore;
-import com.bajie.project.hotupdate.service.ResManagerService;
-import com.bajie.project.hotupdate.util.SVNUtil;
+import com.fast.dev.component.archive.ArchiveUtil;
+import com.fast.dev.core.util.ZipUtil;
+import com.fast.dev.core.util.code.JsonUtil;
+import com.fast.dev.server.hotupdate.model.AppResStore;
+import com.fast.dev.server.hotupdate.service.ResManagerService;
+import com.fast.dev.server.hotupdate.util.GitUtil;
 
 @Component
 @SuppressWarnings("unchecked")
@@ -43,7 +39,7 @@ public class ResManagerServiceImpl implements ResManagerService {
 	private ApplicationContext applicationContext;
 
 	// 配置项
-	private Map<String, HotUpdateStore> hotUpdateStoreMap = null;
+	private Map<String, AppResStore> hotUpdateStoreMap = null;
 
 	// 资源路径
 	private String resDirectoryPath;
@@ -69,17 +65,13 @@ public class ResManagerServiceImpl implements ResManagerService {
 	}
 
 	/// 将磁盘配置文件读取到内存里
-	private Map<String, HotUpdateStore> readConf() throws Exception {
-		Map<String, HotUpdateStore> result = new HashMap<String, HotUpdateStore>();
-		Map<String, Map<String, Object>> m = JsonUtil.loadToObject("ResourcesHotUpdate.json", Map.class);
-		for (Entry<String, Map<String, Object>> entry : m.entrySet()) {
-			Map<String, Object> val = entry.getValue();
-			HotUpdateStore hotUpdateStore = new HotUpdateStore();
-			hotUpdateStore.setStorePath(String.valueOf(val.get("storePath")));
-			hotUpdateStore.setSvnUrl(String.valueOf(val.get("svnUrl")));
-			hotUpdateStore.setUserName(String.valueOf(val.get("userName")));
-			hotUpdateStore.setPassWord(String.valueOf(val.get("passWord")));
-			result.put(entry.getKey(), hotUpdateStore);
+	private Map<String, AppResStore> readConf() throws Exception {
+		Map<String, AppResStore> result = new HashMap<String, AppResStore>();
+		List<Map<String, Object>> resHotUpdate = JsonUtil.loadToObject("ResourcesHotUpdate.json", List.class);
+		for (Map<String, Object> val : resHotUpdate) {
+			AppResStore appResStore = new AppResStore();
+			BeanUtils.populate(appResStore, val);
+			result.put(appResStore.getAppId(), appResStore);
 		}
 		return result;
 	}
@@ -116,32 +108,18 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 	@Override
 	public boolean update(String appId) throws Exception {
-		HotUpdateStore hotUpdateStore = hotUpdateStoreMap.get(appId);
-		if (hotUpdateStore == null) {
+		AppResStore appResStore = hotUpdateStoreMap.get(appId);
+		if (appResStore == null) {
 			return false;
 		}
-
 		// 创建资源版本
 		String newResVerion = createResVersion();
-
-		// svn客户端
-		final SVNClientManager svnClientManager = SVNUtil.authSvn(hotUpdateStore.getSvnUrl(),
-				hotUpdateStore.getUserName(), hotUpdateStore.getPassWord());
-		// SVN的资源Store
-		File svnPath = new File(getResourcesRootPath(appId).getAbsolutePath() + "/" + appId);
-		if (svnPath.exists()) {
-			// 更新最新版本，且无穷的深度
-			SVNUtil.update(svnClientManager, svnPath, SVNRevision.HEAD, SVNDepth.INFINITY);
-		} else {
-			SVNURL svnurl = SVNURL.parseURIEncoded(hotUpdateStore.getSvnUrl());
-			SVNUtil.checkout(svnClientManager, svnurl, SVNRevision.HEAD, svnPath, SVNDepth.INFINITY);
-		}
-		// 销毁
-		svnClientManager.dispose();
-
+		// 工作空间
+		File workPath = new File(getResourcesRootPath(appId).getAbsolutePath() + "/" + appId);
+		// 拉取版本
+		GitUtil.pull(appResStore.getGitUrl(), appResStore.getUserName(), appResStore.getPassWord(), workPath);
 		// 刷新资源Map
 		scanRes(appId, newResVerion);
-
 		// 更新版本号
 		writeResInfo(appId, VERSUFFIX, newResVerion);
 
@@ -155,7 +133,7 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 	@Override
 	public String getResMap(String appId) {
-		HotUpdateStore hotUpdateStore = this.hotUpdateStoreMap.get(appId);
+		AppResStore hotUpdateStore = this.hotUpdateStoreMap.get(appId);
 		if (hotUpdateStore != null) {
 			return hotUpdateStore.getStorePath() + "/" + appId + ASSETSSUFFIX;
 		}
@@ -224,7 +202,7 @@ public class ResManagerServiceImpl implements ResManagerService {
 	private static void scanFiles(final File file, final List<File> list) {
 		for (File f : file.listFiles()) {
 			if (f.isDirectory()) {
-				if (!f.getName().equalsIgnoreCase(".svn")) {
+				if (!f.getName().equalsIgnoreCase(".svn") && !f.getName().equalsIgnoreCase(".git")) {
 					scanFiles(f, list);
 				}
 			} else {
@@ -291,7 +269,7 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 	// 获取根目录资源
 	private File getResourcesRootPath(String resId) {
-		HotUpdateStore hotUpdateStore = this.hotUpdateStoreMap.get(resId);
+		AppResStore hotUpdateStore = this.hotUpdateStoreMap.get(resId);
 		if (hotUpdateStore == null) {
 			return null;
 		}

@@ -1,4 +1,4 @@
-package com.bajie.project.hotupdate.service;
+package com.fast.dev.server.hotupdate.service;
 
 import java.io.InputStream;
 import java.io.OutputStream;

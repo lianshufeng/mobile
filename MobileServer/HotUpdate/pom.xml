@@ -3,23 +3,33 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>HotUpdate</artifactId>
 	<parent>
-		<groupId>com.bajie.project</groupId>
+		<groupId>com.fast.dev</groupId>
 		<artifactId>PParent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
+
 		<dependency>
-			<groupId>com.bajie.project</groupId>
+			<groupId>com.fast.dev</groupId>
 			<artifactId>PCore</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
 		<dependency>
-			<groupId>org.tmatesoft.svnkit</groupId>
-			<artifactId>svnkit</artifactId>
-			<version>1.8.14</version>
+			<groupId>com.fast.dev</groupId>
+			<artifactId>Component-archive</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.8.0.201706111038-r</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+    		<artifactId>commons-beanutils</artifactId>
+    		<version>1.9.2</version>
+		</dependency>
 	</dependencies>
 </project>

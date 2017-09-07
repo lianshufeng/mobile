@@ -186,6 +186,19 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		return null;
 	}
 
+
+	//拷贝JSON数组资源到缓存
+	private void copyJsonResToCache(JSONArray resArr,List<String> files , List<String> updateFiles) throws JSONException {
+		for (int i = 0; i < resArr.length(); i++) {
+			String resName = FileUtil.format(String.valueOf(resArr.get(i)));
+			files.add(FileUtil.format("www" + "/" + resName));
+			updateFiles.add(resName.substring(0, 1).equals("/") ? resName.substring(1, resName.length())
+					: resName);
+		}
+
+	}
+
+
 	/**
 	 * 拷贝资源
 	 * 
@@ -224,14 +237,13 @@ public class ResourcesManagerImpl extends ResourcesManager {
 					final List<String> updateFiles = new ArrayList<String>();
 					try {
 						byte[] bin = StreamUtils.copyToByteArray(context.getAssets().open("AssetsList.json"));
-						JSONArray jsonArray = new JSONArray(new String(bin));
-						for (int i = 0; i < jsonArray.length(); i++) {
-							String resName = FileUtil.format(String.valueOf(jsonArray.get(i)));
-							files.add(FileUtil.format("www" + "/" + resName));
-							updateFiles.add(resName.substring(0, 1).equals("/") ? resName.substring(1, resName.length())
-									: resName);
-						}
-
+						JSONObject jsonObject = new JSONObject(new String(bin));
+						//拷贝只读资源
+						JSONArray readOnlyArr = jsonObject.getJSONArray("readOnlyRes");
+						copyJsonResToCache(readOnlyArr,files,updateFiles);
+						//拷贝读写资源
+						JSONArray readWriteArr = jsonObject.getJSONArray("readWriteRes");
+						copyJsonResToCache(readWriteArr,files,updateFiles);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

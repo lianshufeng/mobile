@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var folder = require('../../../work/build/js/Folder');
+var promise = require('../../../work/build/nodejs/node_modules/promise');
 
 var outputPath = path.join(__dirname, '..', '..', 'output');
 

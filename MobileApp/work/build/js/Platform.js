@@ -6,6 +6,7 @@ var fs = require('fs'),
     folder = require('./folder.js'),
     cordova = require('./Cordova'),
     commandUtil = require('./CommandUtil'),
+    plugin = require('./Plugin'),
     javaUtil = require('./JavaUtil');
 
 
@@ -66,16 +67,18 @@ exports.projects = function(config) {
 //添加平台
 exports.add = function(config) {
     console.log('添加平台');
-    var platPath = process.cwd() + '/build/nodejs/node_modules/';
+    var platPath = path.join(process.cwd() ,'build', 'nodejs', 'node_modules') ;
     try {
         console.log('添加Android平台');
-        cordova.addPlatform(config.output, platPath + 'cordova-android');
+        //添加平台之前先添加本地插件
+        cordova.addPlugin(config.output,path.join(platPath,'cordova-plugin-whitelist'));
+        cordova.addPlatform(config.output, path.join(platPath,'cordova-android'));
     } catch(e) {
         console.log('添加Android平台失败 : '+e);
     }
     try {
         console.log('添加IOS平台');
-        cordova.addPlatform(config.output, platPath + 'cordova-ios');
+        cordova.addPlatform(config.output, path.join(platPath , 'cordova-ios'));
     } catch(e) {
         console.log('添加IOS平台失败 : '+ e);
     }

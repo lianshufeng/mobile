@@ -15,7 +15,7 @@ var config = {
         id:'phone',
         version:'1.0.0',
         icon:path.join(demoPath,'app.png'),
-        crosswalk:false
+        crosswalk:true
     },
     server:{
         url:'http://172.18.21.238:8080/PServer',

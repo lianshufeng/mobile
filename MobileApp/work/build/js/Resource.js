@@ -91,6 +91,23 @@ var imgSizeOf = function(imagePath){
     return img.width+"_"+img.height;
 }
 
+
+//合并资源, 所有资源，只读资源
+var mergeRes = function( allRes , readonlyRes ){
+    var readWriteRes = [];
+    for (var i in allRes){
+        var res = allRes[i];
+        if ( readonlyRes.indexOf (res) == -1 ){
+            readWriteRes.push(res);
+        }
+    }
+    var webResList = {
+        'readOnlyRes':readonlyRes,
+        'readWriteRes':readWriteRes
+    };
+    return webResList;
+}
+
 //处理android平台的资源
 android = function(config) {
     var target = config.output;
@@ -140,8 +157,9 @@ android = function(config) {
     
     //icon资源处理--结束
     //生成UI资源的文件列表--开始
-    var webResPath = targetPaht + 'assets/www/'
-    var webResList = scanFile.scan(webResPath);
+    var allRes = scanFile.scan(path.join( targetPaht , 'assets' , 'www'));
+    var readonlyRes =  scanFile.scan(path.join( targetPaht , 'platform_www' ));
+    var webResList =  mergeRes( allRes , readonlyRes );
     fs.writeFileSync(targetPaht + 'assets/' + AssetsListName, JSON.stringify(webResList));
     //生成UI资源的文件列表--结束
 }
@@ -197,8 +215,9 @@ ios = function(config) {
     
     //icon资源处理--结束
     //生成资源的文件列表--开始
-    var webResPath = targetPaht + 'www/'
-    var webResList = scanFile.scan(webResPath);
+    var allRes = scanFile.scan( path.join( targetPaht , 'www' ) );
+    var readonlyRes =  scanFile.scan( path.join( targetPaht , 'platform_www' ) );
+    var webResList =  mergeRes( allRes , readonlyRes );  
     var AssetsFilePath = path.join(targetPaht,name,'Resources',name,'Resources',AssetsListName);
     fs.writeFileSync(AssetsFilePath, JSON.stringify(webResList));
     //生成资源的文件列表--结束

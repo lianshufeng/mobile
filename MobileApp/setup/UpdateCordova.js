@@ -1,5 +1,6 @@
-var path = require('path');
-var exec = require("child_process").execSync;
+var path = require('path'),
+    exec = require("child_process").execSync,
+    fs = require('fs');
 
 //nodejs的安装目录
 var node_modules_path =  path.join(__dirname,'..','work','build','nodejs');
@@ -24,7 +25,7 @@ var config = {
 
 //安装模块
 var install = function( moduleName ){
-	var result = exec('npm install '+ moduleName , {
+	var result = exec( 'cmd /c npm install '+ moduleName , {
 		cwd: node_modules_path
 	}).toString();
 	return result
@@ -46,14 +47,18 @@ var installArray = function(arr){
 
 //入口
 var main = function(){
+    //创建工作空间
+    if (!fs.existsSync(node_modules_path)){
+        fs.mkdir(node_modules_path);
+    }
 	console.log('开始更新核心模块');
-	installArray(config.core)
+	installArray(config.core);
 	console.log('开始更新平台模块');
-	installArray(config.platforms)
+	installArray(config.platforms);
 	console.log('开始更新插件模块');
-	installArray(config.plugins)
+	installArray(config.plugins);
 	console.log('开始更新支持库模块');
-	installArray(config.libs)
+	installArray(config.libs);
 }
 
 main();

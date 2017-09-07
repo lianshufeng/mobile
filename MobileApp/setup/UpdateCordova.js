@@ -20,13 +20,14 @@ var config = {
 	],
 	libs:[
 		'image-size',
-		'node-uuid'
+		'node-uuid',
+		'promise'
 	]
 }
 
 //安装模块
 var install = function( moduleName ){
-	var result = exec( 'cmd /c npm install '+ moduleName , {
+	var result = exec( 'npm install '+ moduleName , {
 		cwd: node_modules_path
 	}).toString();
 	return result

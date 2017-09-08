@@ -16,7 +16,8 @@ var config = {
 	],
 	plugins:[
 		'cordova-plugin-crosswalk-webview',
-		'cordova-plugin-whitelist'
+		'cordova-plugin-whitelist',
+		'cordova-plugin-appversion'
 	],
 	libs:[
 		'image-size',

@@ -79,7 +79,9 @@ var addPluginZip = function(config){
 
 exports.add=function(config){
     //核心插件
-    addPlugin(config.output,corePlugin(config));
+    addPlugin( config.output , corePlugin(config) );
+    //获取版本的插件
+    addPlugin( config.output , modulePath + 'cordova-plugin-appversion' );
     //按需加载crosswalk
     if (config.app.crosswalk){
         //仅支持android

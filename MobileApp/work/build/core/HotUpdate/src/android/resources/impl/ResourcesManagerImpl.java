@@ -25,9 +25,9 @@ import com.fast.dev.hotupdate.resources.model.UpdateListModel;
 import com.fast.dev.hotupdate.resources.type.CallBackType;
 import com.fast.dev.hotupdate.util.FileUtil;
 import com.fast.dev.hotupdate.util.HttpClient;
+import com.fast.dev.hotupdate.util.HttpClient.ResultBean;
 import com.fast.dev.hotupdate.util.StreamUtils;
 import com.fast.dev.hotupdate.util.ZipUtil;
-import com.fast.dev.hotupdate.util.HttpClient.ResultBean;
 import com.google.common.io.ByteStreams;
 
 import android.app.Activity;
@@ -186,18 +186,16 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		return null;
 	}
 
-
-	//拷贝JSON数组资源到缓存
-	private void copyJsonResToCache(String resTypeName ,List<String> files , List<String> updateFiles) throws JSONException {
-		List<String> resArr= readAppResList(resTypeName);
+	// 拷贝JSON数组资源到缓存
+	private void copyJsonResToCache(String resTypeName, List<String> files, List<String> updateFiles)
+			throws JSONException {
+		List<String> resArr = readAppResList(resTypeName);
 		for (int i = 0; i < resArr.size(); i++) {
 			String resName = FileUtil.format(String.valueOf(resArr.get(i)));
 			files.add(FileUtil.format("www" + "/" + resName));
-			updateFiles.add(resName.substring(0, 1).equals("/") ? resName.substring(1, resName.length())
-					: resName);
+			updateFiles.add(resName.substring(0, 1).equals("/") ? resName.substring(1, resName.length()) : resName);
 		}
 	}
-
 
 	/**
 	 * 拷贝资源
@@ -236,10 +234,10 @@ public class ResourcesManagerImpl extends ResourcesManager {
 					final List<String> files = new ArrayList<String>();
 					final List<String> updateFiles = new ArrayList<String>();
 					try {
-						//拷贝只读资源
-						copyJsonResToCache("readOnlyRes",files,updateFiles);
-						//拷贝读写资源
-						copyJsonResToCache("readWriteRes",files,updateFiles);
+						// 拷贝只读资源
+						copyJsonResToCache("readOnlyRes", files, updateFiles);
+						// 拷贝读写资源
+						copyJsonResToCache("readWriteRes", files, updateFiles);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -351,41 +349,68 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		if (!wwwResources.exists()) {
 			wwwResources.mkdirs();
 		}
+		// 将要处理的资源容器
+		List<String> res = new ArrayList<String>();
+		for (int i = 0; i < files.size(); i++) {
+			// 增加资源到将要处理的列表里
+			res.add(files.get(i));
+			if (i % 20 == 0) {
+				downloadAndUpdate(res, wwwResources);
+			}
+		}
+		downloadAndUpdate(res, wwwResources);
+	}
+
+	/**
+	 * 下载资源并更新
+	 * 
+	 * @param files
+	 * @throws IOException
+	 * @throws UnsupportedEncodingException
+	 */
+	private void downloadAndUpdate(final List<String> res, final File wwwResources)
+			throws UnsupportedEncodingException, IOException {
+		// 没有资源则不处理下载更新列表
+		if (res.size() == 0) {
+			return;
+		}
+		Log.d("更新文件：", String.valueOf(res));
 		HttpClient httpClient = new HttpClient();
 		String postInfo = "";
-		for (String name : files) {
+		for (String name : res) {
 			postInfo += "&fileNames=" + name;
 		}
 		byte[] bin = httpClient.ReadDocuments(createActionUrl(ResUrl), true, postInfo.getBytes("UTF-8")).getData();
 		File tmpFile = new File(System.getProperty("java.io.tmpdir") + "/" + UUID.randomUUID().toString() + ".zip");
 		FileUtils.writeByteArrayToFile(tmpFile, bin);
-		List<String> updateFiles = ZipUtil.unZipFile(tmpFile, wwwResources);
+		ZipUtil.unZipFile(tmpFile, wwwResources);
 		tmpFile.delete();
+		res.clear();
 	}
 
 	/**
 	 * 读取app的资源
+	 * 
 	 * @param typeName
 	 * @return
 	 */
-	private List<String> readAppResList (String typeName)  {
+	private List<String> readAppResList(String typeName) {
 		List<String> res = null;
-		try{
+		try {
 			res = new ArrayList<String>();
 			byte[] bin = StreamUtils.copyToByteArray(context.getAssets().open("AssetsList.json"));
 			JSONObject jsonObject = new JSONObject(new String(bin));
-			//拷贝只读资源
+			// 拷贝只读资源
 			JSONArray readOnlyArr = jsonObject.getJSONArray(typeName);
-			for(int i = 0 ; i<readOnlyArr.length();i++){
+			for (int i = 0; i < readOnlyArr.length(); i++) {
 				res.add(readOnlyArr.getString(i));
 			}
-			}catch (Exception e){
-				e.printStackTrace();
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return res;
 
 	}
-
 
 	/**
 	 * 开始更新
@@ -421,8 +446,8 @@ public class ResourcesManagerImpl extends ResourcesManager {
 					// 判断文件是否存在，保证一定会得到更新
 					File file = new File(targetPath + key);
 					if (file.exists()) {
-						//避免字符串比较错误
-						if (Long.parseLong(localHash,16) != Long.parseLong(remoteHash,16) ) {
+						// 避免字符串比较错误
+						if (Long.parseLong(localHash, 16) != Long.parseLong(remoteHash, 16)) {
 							needUpdateList.add(key);
 						}
 					} else {
@@ -433,15 +458,15 @@ public class ResourcesManagerImpl extends ResourcesManager {
 				}
 			}
 
-			//获取只读文件列表
-			List<String> readOnlyRes = 	readAppResList("readOnlyRes");
+			// 获取只读文件列表
+			List<String> readOnlyRes = readAppResList("readOnlyRes");
 			// 计算得出没有被使用过的文件
 			Iterator<String> delList = filehash.keys();
 			List<String> dels = new ArrayList<String>();
 			while (delList.hasNext()) {
 				String delFile = delList.next();
-				delFile = delFile.substring(0,1).equals("/")?delFile:"/"+delFile;
-				if (!readOnlyRes.contains(delFile) ) {
+				delFile = delFile.substring(0, 1).equals("/") ? delFile : "/" + delFile;
+				if (!readOnlyRes.contains(delFile)) {
 					dels.add(delFile);
 				}
 			}

@@ -185,12 +185,14 @@ public class ResManagerServiceImpl implements ResManagerService {
 			// 载入资源hash
 			Map<String, Long> fileMap = new ConcurrentHashMap<String, Long>();
 			for (File f : list) {
-				try {
-					CRC32 crc32 = new CRC32();
-					crc32.update(FileUtils.readFileToByteArray(f));
-					fileMap.put(relativePath(source, f), crc32.getValue());
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (f.exists()) {
+					try {
+						CRC32 crc32 = new CRC32();
+						crc32.update(FileUtils.readFileToByteArray(f));
+						fileMap.put(relativePath(source, f), crc32.getValue());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 

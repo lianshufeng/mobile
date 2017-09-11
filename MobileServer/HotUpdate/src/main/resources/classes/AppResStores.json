@@ -1,0 +1,26 @@
+[
+	{
+		"name": "development_user",
+		"gitName": "hykj_git",
+		"gitSourcePath": "/hykj/user/development/",
+		"workSourcePath": "/resources/app/"
+	},
+	{
+		"name": "produce_user",
+		"gitName": "hykj_git",
+		"gitSourcePath": "/hykj/user/produce/",
+		"workSourcePath": "/resources/app/"
+	},
+	{
+		"name": "development_service",
+		"gitName": "hykj_git",
+		"gitSourcePath": "/hykj/service/development/",
+		"workSourcePath": "/resources/app/"
+	},
+	{
+		"name": "produce_service",
+		"gitName": "hykj_git",
+		"gitSourcePath": "/hykj/service/produce/",
+		"workSourcePath": "/resources/app/"
+	}
+]

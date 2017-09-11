@@ -1,9 +1,0 @@
-[
-	{
-		"appId": "phone",
-		"storePath": "/resources/app/",
-		"gitUrl": "https://git.coding.net/lianshufeng/test.git",
-		"userName": "lianshufeng",
-		"passWord": "******"
-	}
-]

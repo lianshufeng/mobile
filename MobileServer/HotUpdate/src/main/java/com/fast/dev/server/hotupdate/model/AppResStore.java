@@ -10,58 +10,48 @@ package com.fast.dev.server.hotupdate.model;
  */
 public class AppResStore {
 
-	private String appId;
-
 	// APP的ID
-	private String storePath;
+	private String name;
 
-	// GIT 地址
-	private String gitUrl;
+	// Git仓库名称
+	private String gitName;
 
-	// GIT账号
-	private String userName;
+	// Git 源路径, 相对路径
+	private String gitSourcePath;
 
-	// GIT密码
-	private String passWord;
+	// 工作空间路径，相对路径
+	private String workSourcePath;
 
-	public String getAppId() {
-		return appId;
+	public String getGitName() {
+		return gitName;
 	}
 
-	public void setAppId(String appId) {
-		this.appId = appId;
+	public void setGitName(String gitName) {
+		this.gitName = gitName;
 	}
 
-	public String getStorePath() {
-		return storePath;
+	public String getGitSourcePath() {
+		return gitSourcePath;
 	}
 
-	public void setStorePath(String storePath) {
-		this.storePath = storePath;
+	public void setGitSourcePath(String gitSourcePath) {
+		this.gitSourcePath = gitSourcePath;
 	}
 
-	public String getGitUrl() {
-		return gitUrl;
+	public String getWorkSourcePath() {
+		return workSourcePath;
 	}
 
-	public void setGitUrl(String gitUrl) {
-		this.gitUrl = gitUrl;
+	public void setWorkSourcePath(String workSourcePath) {
+		this.workSourcePath = workSourcePath;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getName() {
+		return name;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getPassWord() {
-		return passWord;
-	}
-
-	public void setPassWord(String passWord) {
-		this.passWord = passWord;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.fast.dev.server.hotupdate.service.impl;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +27,7 @@ import com.fast.dev.component.archive.ArchiveUtil;
 import com.fast.dev.core.util.ZipUtil;
 import com.fast.dev.core.util.code.JsonUtil;
 import com.fast.dev.server.hotupdate.model.AppResStore;
+import com.fast.dev.server.hotupdate.model.GitStore;
 import com.fast.dev.server.hotupdate.service.ResManagerService;
 import com.fast.dev.server.hotupdate.util.GitUtil;
 
@@ -39,7 +41,10 @@ public class ResManagerServiceImpl implements ResManagerService {
 	private ApplicationContext applicationContext;
 
 	// 配置项
-	private Map<String, AppResStore> hotUpdateStoreMap = null;
+	private Map<String, AppResStore> appResStoreMap = null;
+
+	// git仓库
+	private Map<String, GitStore> gitStoreMap = null;
 
 	// 资源路径
 	private String resDirectoryPath;
@@ -55,7 +60,8 @@ public class ResManagerServiceImpl implements ResManagerService {
 		// 设置资源路径
 		// resDirectoryPath = buildPlugin.getWebStaticResourcesDirectory();
 		try {
-			hotUpdateStoreMap = readConf();
+			appResStoreMap = readConf("AppResStores.json", AppResStore.class);
+			gitStoreMap = readConf("GitStores.json", GitStore.class);
 			resDirectoryPath = this.applicationContext.getResource(".").getFile().getAbsolutePath() + "/";
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -64,16 +70,15 @@ public class ResManagerServiceImpl implements ResManagerService {
 		logger.info("WebAppStore", resDirectoryPath);
 	}
 
-	/// 将磁盘配置文件读取到内存里
-	private Map<String, AppResStore> readConf() throws Exception {
-		Map<String, AppResStore> result = new HashMap<String, AppResStore>();
-		List<Map<String, Object>> resHotUpdate = JsonUtil.loadToObject("ResourcesHotUpdate.json", List.class);
-		for (Map<String, Object> val : resHotUpdate) {
-			AppResStore appResStore = new AppResStore();
-			BeanUtils.populate(appResStore, val);
-			result.put(appResStore.getAppId(), appResStore);
+	private <T> T readConf(String configName, Class<?> cls) throws Exception {
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<Map<String, Object>> lists = JsonUtil.loadToObject(configName, List.class);
+		for (Map<String, Object> val : lists) {
+			Object obj = cls.newInstance();
+			BeanUtils.populate(obj, val);
+			result.put(String.valueOf(val.get("name")), obj);
 		}
-		return result;
+		return (T) result;
 	}
 
 	@Override
@@ -107,17 +112,25 @@ public class ResManagerServiceImpl implements ResManagerService {
 	}
 
 	@Override
-	public boolean update(String appId) throws Exception {
-		AppResStore appResStore = hotUpdateStoreMap.get(appId);
+	public boolean update(final String appId) throws Exception {
+		// 应用资源
+		AppResStore appResStore = this.appResStoreMap.get(appId);
 		if (appResStore == null) {
+			return false;
+		}
+		// 仓库资源
+		String gitName = appResStore.getGitName();
+		if (gitName == null) {
+			return false;
+		}
+		GitStore gitStore = this.gitStoreMap.get(gitName);
+		if (gitStore == null) {
 			return false;
 		}
 		// 创建资源版本
 		String newResVerion = createResVersion();
-		// 工作空间
-		File workPath = new File(getResourcesRootPath(appId).getAbsolutePath() + "/" + appId);
-		// 拉取版本
-		GitUtil.pull(appResStore.getGitUrl(), appResStore.getUserName(), appResStore.getPassWord(), workPath);
+		// 更新git并同步到工作空间
+		updateGitToWork(appResStore, gitStore);
 		// 刷新资源Map
 		scanRes(appId, newResVerion);
 		// 更新版本号
@@ -133,9 +146,9 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 	@Override
 	public String getResMap(String appId) {
-		AppResStore hotUpdateStore = this.hotUpdateStoreMap.get(appId);
-		if (hotUpdateStore != null) {
-			return hotUpdateStore.getStorePath() + "/" + appId + ASSETSSUFFIX;
+		AppResStore appResStore = this.appResStoreMap.get(appId);
+		if (appResStore != null) {
+			return appResStore.getWorkSourcePath() + "/" + appId + ASSETSSUFFIX;
 		}
 		return null;
 	}
@@ -170,12 +183,12 @@ public class ResManagerServiceImpl implements ResManagerService {
 			File source = new File(rootPath.getAbsolutePath() + "/" + resId);
 			scanFiles(source, list);
 			// 载入资源hash
-			Map<String, String> fileMap = new ConcurrentHashMap<String, String>();
+			Map<String, Long> fileMap = new ConcurrentHashMap<String, Long>();
 			for (File f : list) {
 				try {
 					CRC32 crc32 = new CRC32();
 					crc32.update(FileUtils.readFileToByteArray(f));
-					fileMap.put(relativePath(source, f), Long.toHexString(crc32.getValue()));
+					fileMap.put(relativePath(source, f), crc32.getValue());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -269,11 +282,47 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 	// 获取根目录资源
 	private File getResourcesRootPath(String resId) {
-		AppResStore hotUpdateStore = this.hotUpdateStoreMap.get(resId);
-		if (hotUpdateStore == null) {
+		AppResStore appResStore = this.appResStoreMap.get(resId);
+		if (appResStore == null) {
 			return null;
 		}
-		return new File(this.resDirectoryPath + hotUpdateStore.getStorePath());
+		return new File(this.resDirectoryPath + appResStore.getWorkSourcePath());
+	}
+
+	/**
+	 * 更新资源并同步到工作空间
+	 * 
+	 * @param workFile
+	 * @param gitStore
+	 * @throws IOException
+	 */
+	private void updateGitToWork(AppResStore appResStore, GitStore gitStore) throws IOException {
+		// 应用ID
+		String appId = appResStore.getName();
+		// 工作空间
+		File workFile = new File(getResourcesRootPath(appId).getAbsolutePath() + "/" + appId);
+		// git仓库目录
+		File gitStoreFile = new File(gitStore.getGitStorePath());
+		// 拉取或者更新代码
+		GitUtil.pull(gitStore.getGitUrl(), gitStore.getUserName(), gitStore.getPassWord(), gitStoreFile);
+		// 删除工作空间
+		if (workFile.exists()) {
+			FileUtils.cleanDirectory(workFile);
+		} else {
+			workFile.mkdirs();
+		}
+
+		// 拷贝文件
+		File source = new File(gitStoreFile.getAbsolutePath() + "/" + appResStore.getGitSourcePath());
+		if (source.exists()) {
+			FileUtils.copyDirectory(source, workFile, new FileFilter() {
+				@Override
+				public boolean accept(File pathname) {
+					return !pathname.getName().equalsIgnoreCase(".git");
+				}
+			});
+		}
+
 	}
 
 }

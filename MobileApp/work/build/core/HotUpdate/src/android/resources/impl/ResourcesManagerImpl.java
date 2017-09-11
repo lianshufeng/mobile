@@ -50,9 +50,8 @@ public class ResourcesManagerImpl extends ResourcesManager {
 	private static final String ResUrl = "ActionResources";
 	// 版本名称
 	private final static String FilesVersionName = "files.ver";
-	//存放资源文件hash的文件名
+	// 存放资源文件hash的文件名
 	private final static String FileHashName = "files.hash";
-
 	// 拷贝线程的资源
 	private Thread runCopyResThread = null;
 	// 检查是否在
@@ -264,7 +263,7 @@ public class ResourcesManagerImpl extends ResourcesManager {
 					}
 					try {
 						// 更新缓存资源hash
-						if (updateResCache(updateFiles)){
+						if (updateResCache(updateFiles)) {
 							// 写app版本号到文件，表示安装成功
 							FileUtils.writeByteArrayToFile(buildFile, versionName.getBytes());
 							// 清空本地资源号，因为可能更新非首次安装
@@ -305,7 +304,7 @@ public class ResourcesManagerImpl extends ResourcesManager {
 			removeFileList(updateListModel.getDelList());
 
 			// 更新本地的hash缓存
-			if (updateResCache(updateListModel.getAllList())){
+			if (updateResCache(updateListModel.getAllList())) {
 				// 保存版本信息到本地
 				saveLocalVersion(updateListModel.getVersion());
 				sendHandlerMessage(CallBackType.EndUpdate.toString(), data);
@@ -440,17 +439,16 @@ public class ResourcesManagerImpl extends ResourcesManager {
 				// 文件名
 				String key = String.valueOf(iterator.next());
 				// 服务端的文件hash
-				String remoteHash = content.getString(key);
+				Long remoteHash = content.getLong(key);
 				// 本地缓存的文件hash， 每次都删除一个，如果没有被删除则说明该文件是本地多余的文件
-				String localHash = String.valueOf(filehash.remove(key));
+				Long localHash = (Long) filehash.remove(key);
 				// 所有的资源名称
 				allList.add(key);
 				try {
 					// 判断文件是否存在，保证一定会得到更新
 					File file = new File(targetPath + key);
 					if (file.exists()) {
-						// 避免字符串比较错误
-						if (Long.parseLong(localHash, 16) != Long.parseLong(remoteHash, 16)) {
+						if (localHash != remoteHash) {
 							needUpdateList.add(key);
 						}
 					} else {
@@ -600,15 +598,15 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		// 计算更新的文件hash
 		for (String resName : list) {
 			File file = new File(targetPath.getAbsolutePath() + "/" + resName);
-			if (file.exists()){
+			if (file.exists()) {
 				CRC32 crc32 = new CRC32();
 				crc32.update(FileUtils.readFileToByteArray(file));
-				String fileHash = Long.toHexString(crc32.getValue());
-				jsonObject.put(resName, fileHash);
+				jsonObject.put(resName, crc32.getValue());
 			}
 		}
 		// 保存hash列表到缓存
-		FileUtils.writeStringToFile(new File(resourcesFile.getAbsolutePath() + "/"+ FileHashName), jsonObject.toString());
+		FileUtils.writeStringToFile(new File(resourcesFile.getAbsolutePath() + "/" + FileHashName),
+				jsonObject.toString());
 		System.out.println("更新文件缓存hash完成. size:" + list.size());
 		return jsonObject.length() == list.size();
 	}
@@ -624,7 +622,7 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		JSONObject jsonObject = null;
 		// 取出资源目录
 		final File resourcesFile = getResourcesFile();
-		final File file = new File(resourcesFile.getAbsolutePath() + "/"+FileHashName);
+		final File file = new File(resourcesFile.getAbsolutePath() + "/" + FileHashName);
 		if (file.exists()) {
 			// 读取缓存hash列表转
 			byte[] bin = FileUtils.readFileToByteArray(file);

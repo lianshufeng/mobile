@@ -441,7 +441,7 @@ public class ResourcesManagerImpl extends ResourcesManager {
 				// 服务端的文件hash
 				Long remoteHash = content.getLong(key);
 				// 本地缓存的文件hash， 每次都删除一个，如果没有被删除则说明该文件是本地多余的文件
-				Long localHash = (Long) filehash.remove(key);
+				Long localHash = (Long.parseLong(String.valueOf( filehash.remove(key) ))) ;
 				// 所有的资源名称
 				allList.add(key);
 				try {

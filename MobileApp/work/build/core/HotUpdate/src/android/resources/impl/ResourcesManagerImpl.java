@@ -356,7 +356,7 @@ public class ResourcesManagerImpl extends ResourcesManager {
 		for (int i = 0; i < files.size(); i++) {
 			// 增加资源到将要处理的列表里
 			res.add(files.get(i));
-			if (i % 30 == 0) {
+			if (i % 30 == 0 && i > 0  ) {
 				downloadAndUpdate(res, wwwResources);
 			}
 		}
@@ -441,14 +441,15 @@ public class ResourcesManagerImpl extends ResourcesManager {
 				// 服务端的文件hash
 				Long remoteHash = content.getLong(key);
 				// 本地缓存的文件hash， 每次都删除一个，如果没有被删除则说明该文件是本地多余的文件
-				Long localHash = (Long.parseLong(String.valueOf( filehash.remove(key) ))) ;
+				Object val = filehash.remove(key);
+				Long localHash = val==null ? null : (Long.parseLong(String.valueOf( val))) ;
 				// 所有的资源名称
 				allList.add(key);
 				try {
 					// 判断文件是否存在，保证一定会得到更新
 					File file = new File(targetPath + key);
-					if (file.exists()) {
-						if (localHash != remoteHash) {
+					if (file.exists() && localHash !=null) {
+						if ( ! localHash .equals(remoteHash) ) {
 							needUpdateList.add(key);
 						}
 					} else {

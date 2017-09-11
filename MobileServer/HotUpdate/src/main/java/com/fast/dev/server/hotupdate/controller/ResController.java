@@ -26,8 +26,13 @@ public class ResController {
 
 	@RequestMapping("update.json")
 	public InvokerResult<Object> update(String appId) throws Exception {
-		Object o = this.resManagerService.update(appId);
-		return new InvokerResult<Object>(o);
+		Object result = null;
+		if (appId == null) {
+			result = this.resManagerService.listUpdateTask();
+		} else {
+			result = this.resManagerService.update(appId);
+		}
+		return new InvokerResult<Object>(result);
 	}
 
 	@RequestMapping("getVersion")

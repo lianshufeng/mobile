@@ -2,6 +2,9 @@ package com.fast.dev.server.hotupdate.service;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
+
+import com.fast.dev.server.hotupdate.model.UpdateTask;
 
 /**
  * 资源管理器
@@ -24,7 +27,14 @@ public interface ResManagerService {
 	 * @param appId
 	 * @return
 	 */
-	public boolean update(String appId) throws Exception;
+	public UpdateTask update(String appId) throws Exception;
+
+	/**
+	 * 获取所有的更新任务
+	 * 
+	 * @return
+	 */
+	public Map<String, UpdateTask> listUpdateTask();
 
 	/**
 	 * 获取资源版本

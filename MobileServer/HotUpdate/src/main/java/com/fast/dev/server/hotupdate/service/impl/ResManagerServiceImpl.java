@@ -1,7 +1,6 @@
 package com.fast.dev.server.hotupdate.service.impl;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,7 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.CRC32;
+
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.FileUtils;
@@ -28,23 +31,23 @@ import com.fast.dev.core.util.ZipUtil;
 import com.fast.dev.core.util.code.JsonUtil;
 import com.fast.dev.server.hotupdate.model.AppResStore;
 import com.fast.dev.server.hotupdate.model.GitStore;
+import com.fast.dev.server.hotupdate.model.UpdateTask;
 import com.fast.dev.server.hotupdate.service.ResManagerService;
+import com.fast.dev.server.hotupdate.type.TaskStat;
 import com.fast.dev.server.hotupdate.util.GitUtil;
 
 @Component
 @SuppressWarnings("unchecked")
 public class ResManagerServiceImpl implements ResManagerService {
-
 	private static final Logger logger = LoggerFactory.getLogger(ResManagerService.class);
-
 	@Autowired
 	private ApplicationContext applicationContext;
-
 	// 配置项
 	private Map<String, AppResStore> appResStoreMap = null;
-
 	// git仓库
 	private Map<String, GitStore> gitStoreMap = null;
+	// 更新缓存，只读不考虑线程安全
+	private Map<String, UpdateTask> updateTaskMap = null;
 
 	// 资源路径
 	private String resDirectoryPath;
@@ -55,6 +58,16 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 	private final static SimpleDateFormat DateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
+	private final static SimpleDateFormat ShowDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	// 并发任务线程池
+	private ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10);
+
+	@PreDestroy
+	private void shutdown() {
+		fixedThreadPool.shutdownNow();
+	}
+
 	@Autowired
 	private void init(ApplicationContext applicationContext) {
 		// 设置资源路径
@@ -62,12 +75,24 @@ public class ResManagerServiceImpl implements ResManagerService {
 		try {
 			appResStoreMap = readConf("AppResStores.json", AppResStore.class);
 			gitStoreMap = readConf("GitStores.json", GitStore.class);
+			// 初始化更新任务
+			initUpdateTask();
 			resDirectoryPath = this.applicationContext.getResource(".").getFile().getAbsolutePath() + "/";
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		logger.info("WebAppStore", resDirectoryPath);
+	}
+
+	/**
+	 * 初始化更新任务
+	 */
+	private void initUpdateTask() {
+		this.updateTaskMap = new HashMap<String, UpdateTask>();
+		for (AppResStore appResStore : this.appResStoreMap.values()) {
+			this.updateTaskMap.put(appResStore.getName(), new UpdateTask());
+		}
 	}
 
 	private <T> T readConf(String configName, Class<?> cls) throws Exception {
@@ -112,31 +137,41 @@ public class ResManagerServiceImpl implements ResManagerService {
 	}
 
 	@Override
-	public boolean update(final String appId) throws Exception {
-		// 应用资源
-		AppResStore appResStore = this.appResStoreMap.get(appId);
-		if (appResStore == null) {
-			return false;
-		}
-		// 仓库资源
-		String gitName = appResStore.getGitName();
-		if (gitName == null) {
-			return false;
-		}
-		GitStore gitStore = this.gitStoreMap.get(gitName);
-		if (gitStore == null) {
-			return false;
-		}
-		// 创建资源版本
-		String newResVerion = createResVersion();
-		// 更新git并同步到工作空间
-		updateGitToWork(appResStore, gitStore);
-		// 刷新资源Map
-		scanRes(appId, newResVerion);
-		// 更新版本号
-		writeResInfo(appId, VERSUFFIX, newResVerion);
+	public Map<String, UpdateTask> listUpdateTask() {
+		return this.updateTaskMap;
+	}
 
-		return true;
+	@Override
+	public UpdateTask update(final String appId) throws Exception {
+		final UpdateTask updateTask = this.updateTaskMap.get(appId);
+		if (updateTask == null) {
+			return null;
+		}
+
+		// 当前任务正在更新
+		if (updateTask.getTaskStat() == TaskStat.Finish) {
+			synchronized (updateTask) {
+				// 设置正在工作状态
+				updateTask.setTaskStat(TaskStat.Work);
+				// 启动线程
+				this.fixedThreadPool.execute(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							startResAppTask(appId);
+							// 更新状态
+							updateTask.setTaskStat(TaskStat.Finish);
+							updateTask.setLastUpdateDate(ShowDateFormat.format(new Date(System.currentTimeMillis())));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+
+			}
+		}
+
+		return updateTask;
 	}
 
 	@Override
@@ -169,6 +204,39 @@ public class ResManagerServiceImpl implements ResManagerService {
 
 		ZipUtil.zip(zipFileOutputStream, fileMap);
 
+	}
+
+	/**
+	 * 启动任务线程
+	 * 
+	 * @param appId
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean startResAppTask(String appId) throws Exception {
+		// 应用资源
+		AppResStore appResStore = this.appResStoreMap.get(appId);
+		if (appResStore == null) {
+			return false;
+		}
+		// 仓库资源
+		String gitName = appResStore.getGitName();
+		if (gitName == null) {
+			return false;
+		}
+		GitStore gitStore = this.gitStoreMap.get(gitName);
+		if (gitStore == null) {
+			return false;
+		}
+		// 创建资源版本
+		String newResVerion = createResVersion();
+		// 更新git并同步到工作空间
+		updateGitToWork(appResStore, gitStore);
+		// 刷新资源Map
+		scanRes(appId, newResVerion);
+		// 更新版本号
+		writeResInfo(appId, VERSUFFIX, newResVerion);
+		return true;
 	}
 
 	/**
@@ -296,9 +364,9 @@ public class ResManagerServiceImpl implements ResManagerService {
 	 * 
 	 * @param workFile
 	 * @param gitStore
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	private void updateGitToWork(AppResStore appResStore, GitStore gitStore) throws IOException {
+	private void updateGitToWork(AppResStore appResStore, GitStore gitStore) throws Exception {
 		// 应用ID
 		String appId = appResStore.getName();
 		// 工作空间
@@ -307,22 +375,56 @@ public class ResManagerServiceImpl implements ResManagerService {
 		File gitStoreFile = new File(gitStore.getGitStorePath());
 		// 拉取或者更新代码
 		GitUtil.pull(gitStore.getGitUrl(), gitStore.getUserName(), gitStore.getPassWord(), gitStoreFile);
-		// 删除工作空间
-		if (workFile.exists()) {
-			FileUtils.cleanDirectory(workFile);
-		} else {
+		// 创建工作空间
+		if (!workFile.exists()) {
 			workFile.mkdirs();
+		}
+
+		// 读取缓存文件
+		String json = readResInfo(appId, ASSETSSUFFIX);
+		Map<String, Object> resCacheMap = null;
+		if (json == null) {
+			resCacheMap = new HashMap<String, Object>();
+		} else {
+			try {
+				resCacheMap = JsonUtil.toObject(json, Map.class);
+				resCacheMap = (Map<String, Object>) resCacheMap.get("map");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		// 拷贝文件
 		File source = new File(gitStoreFile.getAbsolutePath() + "/" + appResStore.getGitSourcePath());
 		if (source.exists()) {
-			FileUtils.copyDirectory(source, workFile, new FileFilter() {
-				@Override
-				public boolean accept(File pathname) {
-					return !pathname.getName().equalsIgnoreCase(".git");
+			List<File> sources = new ArrayList<File>();
+			scanFiles(source, sources);
+			for (File sFile : sources) {
+				// 相对名称
+				String relativeName = ZipUtil.relativeName(source.getAbsolutePath(), sFile.getAbsolutePath());
+				// 该文件已存在
+				resCacheMap.remove(relativeName);
+				// 目标文件
+				File targetFile = new File(workFile.getAbsolutePath() + "/" + relativeName);
+				boolean needUpdate = false;
+				if (!targetFile.exists()) {
+					needUpdate = true;
+				} else if (targetFile.lastModified() != sFile.lastModified()) {
+					needUpdate = true;
 				}
-			});
+				if (needUpdate) {
+					FileUtils.copyFile(sFile, targetFile);
+				}
+			}
+
+			// 删除无用文件
+			for (String fileName : resCacheMap.keySet()) {
+				File file = new File(workFile.getAbsolutePath() + "/" + fileName);
+				if (file.exists()) {
+					file.delete();
+				}
+			}
+
 		}
 
 	}

@@ -53,11 +53,17 @@ exports.projects = function(config) {
     folder.copy(templatePath, projectConfig);
     //如果资源文件存在，则解压资源文件
     if (fs.existsSync(config.project)) {
-        var cmds = [];
-        commandUtil.append(cmds, config.project, true);
-        commandUtil.append(cmds, path.join(projectConfig , 'www'), true);
-        var ret = javaUtil.call('UnArchive.groovy', cmds);
-        console.log('准备项目资源完成该.');
+        if (fs.statSync(config.project).isDirectory()){
+            //复制资源
+            folder.copy( config.project , path.join(projectConfig , 'www') );
+        }else{
+            //解压资源
+            var cmds = [];
+            commandUtil.append(cmds, config.project, true);
+            commandUtil.append(cmds, path.join(projectConfig , 'www'), true);
+            var ret = javaUtil.call('UnArchive.groovy', cmds);
+            console.log('准备项目资源完成该.');
+        }
     }
     //创建项目
     cordova.create(config.output, config.app.package, config.app.name, projectConfig);

@@ -51,21 +51,21 @@ addPlugin=function(output,pluginPath){
 
 //添加目录插件
 var addPluginFolder = function(config){
-    var pluginNames = fs.readdirSync(config.plugins);
+    var pluginNames = fs.readdirSync(config.plugins.path);
     //添加配置插件
     for(var i in pluginNames){
         var pluginName = pluginNames[i];
         var variables = '';
-        if ( config.pluginsVariable && config.pluginsVariable[pluginName] ){
-            var pluginVar = config.pluginsVariable[pluginName];
+        if ( config.plugins && config.plugins.variables && config.plugins.variables[pluginName] ){
+            var pluginVar = config.plugins.variables[pluginName];
             for (var varKey in pluginVar ){
                 variables += ' --variable ' + varKey + '=' +'"'+pluginVar[varKey] + '"';
             }
         }
         //追加变量列表
-        var pluginPath = path.join( config.plugins , pluginName ) ;
+        var pluginPath = path.join( config.plugins.path , pluginName ) ;
         if (fs.statSync(pluginPath).isDirectory()){
-             addPlugin(config.output,pluginPath + variables);
+             addPlugin( config.output , pluginPath + variables );
         }
     }
 }
@@ -75,11 +75,11 @@ var addPluginZip = function(config){
     var baseName = path.basename(config.output);
     var pluginsPath = path.join(path.dirname(config.output), baseName + '_install','plugins');
     var cmds = [];
-    commandUtil.append(cmds, config.plugins , true);
+    commandUtil.append(cmds, config.plugins.path , true);
     commandUtil.append(cmds, pluginsPath, true);
     javaUtil.call('UnArchive.groovy', cmds);
     //更换配置里的插件路径
-    config.plugins = pluginsPath;
+    config.plugins.path = pluginsPath;
     console.log('解压插件包完成.');
     //调用添加目录插件的方法
     addPluginFolder(config);
@@ -96,8 +96,8 @@ exports.add=function(config){
         //仅支持android
         addPlugin(config.output,modulePath+'cordova-plugin-crosswalk-webview --variable XWALK_COMMANDLINE="--disable-pull-to-refresh-effect --ignore-gpu-blacklist"');
     }
-    if (fs.existsSync(config.plugins)){
-        if (fs.statSync(config.plugins).isDirectory()){
+    if (config.plugins && config.plugins.path && fs.existsSync(config.plugins.path) ){
+        if (fs.statSync(config.plugins.path).isDirectory()){
             //目录
             addPluginFolder(config);
         }else{

@@ -10,15 +10,15 @@ var demoPath = __dirname;
 
 var config = {
     app:{
-        name:'快速移动',
-        package:'com.fast.dev.app.demo',
-        id:'phone',
+        name:'鸿远工程-本地-测试',
+        package:'com.fast.dev.app.demo.local',
+        id:'development_user',
         version:'1.0.0',
         icon:path.join(demoPath,'app.png'),
         crosswalk:true
     },
     server:{
-        url:'http://172.18.21.238:8080/PServer',
+        url:'http://192.168.0.110:8080/PServer',
         action:{
             version : '/HotUpdate/getVersion',
             map : '/HotUpdate/getMap',
@@ -41,10 +41,14 @@ var config = {
     },
     output : path.join(demoPath,'..','output',new Date().getTime().toString()),
     project: path.join(demoPath,'app.zip'),
-    plugins: path.join(demoPath,'plugins.rar'),
-    pushApiKey:{
-        android:'TLdXLOb1lnHr2HGZhxnPikxb',
-        ios:'zi0yKSP2qGhqPmPLgIodBNKp'
+    plugins: {
+        path : path.join(demoPath,'plugins.rar'),
+        variables : {
+            'cordova-plugin-baidumaplocation' : {
+                'ANDROID_KEY':'TLdXLOb1lnHr2HGZhxnPikxb',
+                'IOS_KEY':'zi0yKSP2qGhqPmPLgIodBNKp'
+            }
+        }
     }
 }
 

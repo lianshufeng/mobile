@@ -54,9 +54,18 @@ var addPluginFolder = function(config){
     var pluginNames = fs.readdirSync(config.plugins);
     //添加配置插件
     for(var i in pluginNames){
-        var pluginPath = path.join( config.plugins , pluginNames[i] );
+        var pluginName = pluginNames[i];
+        var variables = '';
+        if ( config.pluginsVariable && config.pluginsVariable[pluginName] ){
+            var pluginVar = config.pluginsVariable[pluginName];
+            for (var varKey in pluginVar ){
+                variables += ' --variable ' + varKey + '=' +'"'+pluginVar[varKey] + '"';
+            }
+        }
+        //追加变量列表
+        var pluginPath = path.join( config.plugins , pluginName ) ;
         if (fs.statSync(pluginPath).isDirectory()){
-             addPlugin(config.output,pluginPath);
+             addPlugin(config.output,pluginPath + variables);
         }
     }
 }

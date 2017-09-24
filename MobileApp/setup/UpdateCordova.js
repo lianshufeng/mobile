@@ -15,9 +15,7 @@ var config = {
 		'cordova-ios'
 	],
 	plugins:[
-		'cordova-plugin-crosswalk-webview',
-		'cordova-plugin-whitelist',
-		'cordova-plugin-appversion'
+		'cordova-plugin-whitelist'
 	],
 	libs:[
 		'image-size',

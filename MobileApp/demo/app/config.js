@@ -14,8 +14,7 @@ var config = {
         package:'com.fast.dev.app.demo.local',
         id:'development_user',
         version:'1.0.0',
-        icon:path.join(demoPath,'app.png'),
-        crosswalk:true
+        icon:path.join(demoPath,'app.png')
     },
     server:{
         url:'http://192.168.0.110:8080/PServer',
@@ -47,6 +46,9 @@ var config = {
             'cordova-plugin-baidumaplocation' : {
                 'ANDROID_KEY':'TLdXLOb1lnHr2HGZhxnPikxb',
                 'IOS_KEY':'zi0yKSP2qGhqPmPLgIodBNKp'
+            },
+            'cordova-plugin-crosswalk-webview' : {
+                'XWALK_COMMANDLINE':'--disable-pull-to-refresh-effect --ignore-gpu-blacklist'
             }
         }
     }
@@ -65,6 +67,13 @@ module.exports = config;
         distributionProfile: 签名发布的配置文件，通过ios开发者申请, 该文件必须匹配开发者id,
         developmentProfile:  签名开发的配置文件
     }
+*/
+
+
+/*
+建议插件:
+    cordova-plugin-appversion 显示app版本
+    cordova-plugin-crosswalk-webview Android 独立浏览器内核
 */
 
 

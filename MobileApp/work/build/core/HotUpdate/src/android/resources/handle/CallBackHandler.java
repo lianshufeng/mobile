@@ -35,12 +35,12 @@ public class CallBackHandler extends Handler {
 		if (stat.equals(CallBackType.EndUpdate.toString())) {
 			int size = bundle.getInt("size");
 			if (size > 0) {
-				new AlertDialog.Builder(context).setTitle("更新提醒").setMessage("已更新 " + size + " 个资源，部分功能重新加载后生效，是否重载？")
+				new AlertDialog.Builder(context).setTitle("更新提醒").setMessage("已更新 " + size + " 个资源，部分功能重启后生效，是否关闭程序？")
 						.setPositiveButton("是", new OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
-								//System.exit(0);
-								context.loadUrl(resourcesManager.getLaunchUrl());
+								System.exit(0);
+								//context.loadUrl(resourcesManager.getLaunchUrl());
 								
 							}
 						}).setNegativeButton("否", null).show();

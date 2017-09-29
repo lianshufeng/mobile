@@ -33,19 +33,20 @@ var config = require(configPath);
 //打印配置
 console.log(config);
 
+//文件存在
+if ( !fs.existsSync(config.output) ){
+    //创建项目
+    platform.projects(config);
 
-//创建项目
-platform.projects(config);
+    //更新config文件, 白名单与版本号
+    resource.updateConfig(config);
 
-//更新config文件, 白名单与版本号
-resource.updateConfig(config);
+    //添加平台
+    platform.add(config);
 
-//添加平台
-platform.add(config);
-
-//添加插件
-plugin.add(config);
-
+    //添加插件
+    plugin.add(config);
+}
 
 //资源处理
 resource.platform(config);

@@ -10,7 +10,7 @@ var demoPath = __dirname;
 
 var config = {
     app:{
-        name:'鸿远工程-本地-测试',
+        name:'测试App',
         package:'com.fast.dev.app.demo.local',
         id:'development_user',
         version:'1.0.0',

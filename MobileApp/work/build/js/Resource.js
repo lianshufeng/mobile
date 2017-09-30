@@ -54,6 +54,21 @@ var versionName = function(config, content) {
     return content;
 }
 
+//禁止拖动滑动效果
+var webviewSetting = function(config, content) {
+    //var tag = '<allow-navigation href="*" />';
+    var tag = '<preference name="WebViewBounce" value="false" />\n<preference name="DisallowOverscroll" value="true" />';
+    if (content.indexOf(tag) == -1) {
+        var prefix = '</widget>';
+        var at = content.lastIndexOf(prefix);
+        var left = content.substring(0, at - 1);
+        var right = content.substring(at, content.length);
+        return left + '\n' + tag + '\n' + right;
+    } else {
+        return content;
+    }
+}
+
 //修改配置文件
 exports.updateConfig = function(config) {
     var configPath = config.output + '/config.xml'
@@ -64,6 +79,9 @@ exports.updateConfig = function(config) {
 
     //修改版本号
     buf = versionName(config, buf);
+    
+    //修改webview的默认设置
+    buf = webviewSetting(config, buf);
 
     fs.writeFileSync(configPath, buf);
 

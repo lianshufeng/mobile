@@ -130,7 +130,7 @@ BOOL isRunTask=false;
         NSLog(@"正在迁移");
         //创建目录
         [self createDirectory:wwwFile];
-        NSArray *files = [self readOldFiles];
+        NSArray *files = [self readInitResFiles];
         [self copyFilesFromFiles:files target:wwwFile];
         //缓存资源文件的hash
         [self cacheFilesHash:files];
@@ -145,13 +145,13 @@ BOOL isRunTask=false;
 }
 
 //读取文件列表
-+(NSArray *) readOldFiles{
++(NSArray *) readInitResFiles{
     NSString * resFiles = [[NSBundle mainBundle] pathForResource:@"AssetsList" ofType:@"json"];
     NSData* fileData = [NSData dataWithContentsOfFile:resFiles];
-    NSArray *json = [NSJSONSerialization JSONObjectWithData:fileData options:kNilOptions error:nil];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:fileData options:kNilOptions error:nil];
     NSMutableArray *newArray = [[NSMutableArray alloc] init];
-    for(int i = 0 ; i<[json count];i++){
-        [newArray addObject:[json[i] substringFromIndex:1]];
+    for(NSString *key in json){
+        [newArray addObjectsFromArray: [json objectForKey:key]];
     }
     return newArray;
 }
@@ -170,8 +170,8 @@ BOOL isRunTask=false;
     for(NSString * filePath in files){
         NSString * fileFullPath =[wwwFile stringByAppendingString:filePath];
         //文件的hash
-        NSString* hash =[self fileMD5:fileFullPath];
-        [dic setValue:hash forKey:filePath];
+        NSUInteger hash =[self fileHash:fileFullPath];
+        [dic setValue:@(hash) forKey:filePath];
     }
     NSData* jsonDate = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:nil];
     NSString * json = [[NSString alloc] initWithData:jsonDate encoding:NSUTF8StringEncoding];
@@ -599,15 +599,18 @@ BOOL isRunTask=false;
 /**
  *取文件hash
  */
-+(NSString*)fileMD5:(NSString*)fileName
++(NSUInteger*)fileHash:(NSString*)fileName
 {
     NSData * data = [NSData dataWithContentsOfFile:fileName];
     uLong crc = crc32(0, NULL, 0);
-    unsigned int creValue  = crc32(crc, data.bytes,data.length);
-    char buf[16] = {0};
-    sprintf(buf, "%x", creValue);
-    NSString *hash = [ [NSString alloc] initWithUTF8String:buf];
-    return hash;
+    return crc32(crc, data.bytes,data.length);
+//    unsigned int creValue   = crc32(crc, data.bytes,data.length);
+//    unsigned int creValue  = crc32(crc, data.bytes,data.length);
+//    char buf[16] = {0};
+//    sprintf(buf, "%x", creValue);
+//    NSString *hash = [ [NSString alloc] initWithUTF8String:buf];
+//    return hash;
+//    return creValue;
 }
 
 

@@ -47,8 +47,8 @@
         if(resArray!=nil && resArray.count>0){
             NSString * msg = [@"已更新 " stringByAppendingString:[NSString stringWithFormat:@"%d",resArray.count]];
             NSLog(@"%@" ,resArray);
-            msg = [msg stringByAppendingString:@" 个资源，部分功能需要重新加载后生效，是否重载？"];
-            [self performSelectorOnMainThread:@selector(showCloseTips:)withObject:msg waitUntilDone:YES];
+            msg = [msg stringByAppendingString:@" 个资源，部分功能需要重新加载后生效，是否退出？"];
+          [self performSelectorOnMainThread:@selector(showCloseTips:)withObject:msg waitUntilDone:YES];
         }
     }
     @catch (NSException *exception) {
@@ -71,8 +71,9 @@
     switch (alertView.tag) {
         case 7758:
             if(buttonIndex==1){
-                NSURLRequest* appReq = [NSURLRequest requestWithURL:[self appUrl] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20.0];
-                [[self webViewEngine] loadRequest:appReq ];
+                //NSURLRequest* appReq = [NSURLRequest requestWithURL:[self appUrl] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20.0];
+                //[[self webViewEngine] loadRequest:appReq ];
+                exit(0);
             }
             break;
         default:

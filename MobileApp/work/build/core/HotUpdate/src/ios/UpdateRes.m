@@ -55,11 +55,21 @@ BOOL isRunTask=false;
             if (resDic != nil ){
                 NSLog(@"有新资源，需要更新。");
                 //load res Map
-                resArray  = [self loadUpdateRes:resDic];
+                NSDictionary* updateDic = [ self loadUpdateRes:resDic];
+                resArray  = [updateDic valueForKey:@"updates"];
+                NSArray * deletes = [updateDic valueForKey:@"deletes"];
+                NSArray * alls = [updateDic valueForKey:@"alls"];
+                
                 NSLog(@"更新资源文件数:%d",resArray.count);
                 if(resArray.count > 0){
+                    //update res
+                    [self updateRes:resArray];
+                    
+                    //delete res
+                    [self removeLocalAssetsList:deletes];
+                    
                     //更新文件同时缓存hash
-                    [self setCacheFilesHash:[self updateRes:resArray]];
+                    [self cacheFilesHash:alls];
                 }
                 //保存服务器的版本好到本地
                 [self saveLocalVersion:[resDic valueForKey:@"version"]];
@@ -78,6 +88,17 @@ BOOL isRunTask=false;
     return  resArray;
 }
 
+//delete local resuorces
++(void) removeLocalAssetsList: (NSArray*) deletes {
+    NSFileManager *fileManger = [NSFileManager defaultManager];
+    NSString * wwwFile = [NSHomeDirectory() stringByAppendingString:wwwPath];
+    for(NSString* fileName in deletes){
+        NSString* filePath = [wwwFile stringByAppendingString: fileName];
+        if ( [fileManger fileExistsAtPath:filePath] == true){
+            [fileManger removeItemAtPath:filePath error:NULL ];
+        }
+    }
+}
 
 
 //取出路径，如果没有拷贝则拷贝
@@ -146,13 +167,9 @@ BOOL isRunTask=false;
 
 //读取文件列表
 +(NSArray *) readInitResFiles{
-    NSString * resFiles = [[NSBundle mainBundle] pathForResource:@"AssetsList" ofType:@"json"];
-    NSData* fileData = [NSData dataWithContentsOfFile:resFiles];
-    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:fileData options:kNilOptions error:nil];
     NSMutableArray *newArray = [[NSMutableArray alloc] init];
-    for(NSString *key in json){
-        [newArray addObjectsFromArray: [json objectForKey:key]];
-    }
+    [newArray addObjectsFromArray:[self loadLocalResourcesConf:@"readOnlyRes"]];
+    [newArray addObjectsFromArray:[self loadLocalResourcesConf:@"readWriteRes"]];
     return newArray;
 }
 
@@ -166,7 +183,8 @@ BOOL isRunTask=false;
 //缓存资源文件的hash
 +(void) setCacheFilesHash : (NSMutableSet*) files {
     NSString * wwwFile = [NSHomeDirectory() stringByAppendingString:wwwPath];
-    NSMutableDictionary * dic = [self loadCacheFiles];
+//    NSMutableDictionary * dic = [self loadCacheFiles];
+    NSMutableDictionary * dic = [NSMutableDictionary dictionary];
     for(NSString * filePath in files){
         NSString * fileFullPath =[wwwFile stringByAppendingString:filePath];
         //文件的hash
@@ -402,26 +420,72 @@ BOOL isRunTask=false;
 /**
  * 载入更新资源
  */
-+(NSArray *) loadUpdateRes : (NSDictionary * )dic {
-    NSArray *array = [NSArray arrayWithObjects: nil];
++(NSDictionary *) loadUpdateRes : (NSDictionary * )dic {
+    //更新资源
+    NSArray * updateFiles = [NSArray arrayWithObjects: nil];
+    //删除资源
+    NSArray * deleteFiles = [NSArray arrayWithObjects: nil];
+    //all
+    NSArray * allFiles = [NSArray arrayWithObjects: nil];
+    
+    //readonly
+    NSArray * readOnlyRes = [self loadLocalResourcesConf: @"readOnlyRes"];
+    
+    
     NSDictionary * map = [dic valueForKey:@"map"];
+    
+    //update and all
     NSDate * now = [NSDate date];
     NSMutableDictionary*  localDic =  [self loadCacheFiles];
     for(NSString * key in map){
-        NSString* localFileHash =  [localDic objectForKey:key];
-        if(![localFileHash isEqualToString:map[key]]){
-            array = [array arrayByAddingObject:key];
+        //all
+        allFiles = [allFiles arrayByAddingObject:key];
+        //update
+        if( ! [readOnlyRes containsObject:key] ){
+            if( [map objectForKey:key] != [localDic objectForKey:key] ){
+                updateFiles = [updateFiles arrayByAddingObject:key];
+            }
+            [localDic removeObjectForKey:key];
         }
         
     }
+    
+   
+    // delete
+    for( NSString* key in localDic){
+        if ( ![readOnlyRes containsObject:key] ){
+           deleteFiles =  [deleteFiles arrayByAddingObject:key];
+        }
+    }
+    
+    //result
+    NSMutableDictionary * resultDic =[ [NSMutableDictionary alloc] init];
+    [resultDic setValue:deleteFiles forKey:@"deletes"];
+    [resultDic setValue:updateFiles forKey:@"updates"];
+    [resultDic setValue:allFiles forKey:@"alls"];
+
     NSLog(@"扫描全局文件开销：%ld" , ((long)[[NSDate date] timeIntervalSince1970] - (long)[now timeIntervalSince1970]) );
-    return array;
+    return resultDic;
 }
 
 
 
-
-
+/*
+ * 载入本地资源配置
+ */
++(NSArray *) loadLocalResourcesConf:(NSString*) key {
+    NSString * resFiles = [[NSBundle mainBundle] pathForResource:@"AssetsList" ofType:@"json"];
+    NSData* fileData = [NSData dataWithContentsOfFile:resFiles];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:fileData options:kNilOptions error:nil];
+    NSArray * resultDic = [NSArray arrayWithObjects: nil];
+    NSArray* resDic =  [json valueForKey:key];
+    for(NSString* key in resDic){
+        NSString* filePath =  [key substringWithRange:NSMakeRange(1, key.length-1)];
+        resultDic = [resultDic arrayByAddingObject:filePath];
+    }
+    return resultDic;
+    
+}
 
 
 

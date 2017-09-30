@@ -62,8 +62,17 @@ BOOL isRunTask=false;
                 
                 NSLog(@"更新资源文件数:%d",resArray.count);
                 if(resArray.count > 0){
+                    NSArray * updates = @[];
+                    for (int i = 0 ; i < resArray.count;i++){
+                        NSString * file = [resArray objectAtIndex:i];
+                        updates = [updates arrayByAddingObject:file];
+                        if ( i > 0 && i % 30 ==0){
+                            [self updateRes:updates];
+                            updates = @[];
+                        }
+                    }
                     //update res
-                    [self updateRes:resArray];
+                    [self updateRes:updates];
                     
                     //delete res
                     [self removeLocalAssetsList:deletes];
@@ -383,7 +392,10 @@ BOOL isRunTask=false;
 /**
  *更新资源文件
  */
-+(NSMutableSet*) updateRes:(NSArray*) resArray{
++(void) updateRes:(NSArray*) resArray{
+    if (resArray.count==0){
+        return ;
+    }
     NSString * resRootFilePath = [NSHomeDirectory() stringByAppendingString:wwwPath];
     NSString*  hostUrl = [self createActionUrl:Action_ResUrl];
     NSString * postInfo = @"";
@@ -400,7 +412,7 @@ BOOL isRunTask=false;
     //解压文件完成替换资源
     NSMutableSet * updateFiles = [NSMutableSet set];
     [self unzipFiles:resZipFile targetFile:resRootFilePath updateFiles:updateFiles];
-    return updateFiles;
+//    return updateFiles;
 }
 
 /**

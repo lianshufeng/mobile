@@ -6,7 +6,8 @@
     //禁止下来出现空白
     super.webView.scrollView.bounces=NO;
     //空出状态栏
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7) {
+    double OSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
+    if (OSVersion >= 7 && OSVersion < 11 ) {
         CGRect viewBounds = [super.webView bounds];
         viewBounds.origin.y = 20;
         viewBounds.size.height = viewBounds.size.height - 20;

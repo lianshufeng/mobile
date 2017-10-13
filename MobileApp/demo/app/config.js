@@ -14,7 +14,12 @@ var config = {
         package:'com.fast.dev.app.demo.local',
         id:'development_user',
         version:'1.0.0',
-        icon:path.join(demoPath,'app.png')
+        icon:path.join(demoPath,'app.png'),
+        launch:{
+            backgroup:'#EEEE00',
+            scale:0.382,
+            icon:path.join(demoPath,'launch_icon.png')
+        }
     },
     server:{
         url:'http://192.168.0.110:8080/PServer',
@@ -77,7 +82,14 @@ module.exports = config;
 */
 
 
-
+/**
+启动界面
+config.app.launch = {
+    backgroup:#若#第一个字符则为RGB十六进制，为数字则为RGB十进制,或者为背景图的文件路径
+    scale:相对背景的缩放比例
+    icon:背景图中的图标
+}
+*/
 
 
 

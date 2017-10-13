@@ -16,7 +16,7 @@ var config = {
         version:'1.0.0',
         icon:path.join(demoPath,'app.png'),
         launch:{
-            backgroup:'#EEEE00',
+            backgroup:path.join(demoPath,'launch_backgroup.jpg'),
             scale:0.382,
             icon:path.join(demoPath,'launch_icon.png')
         }
@@ -43,7 +43,7 @@ var config = {
             password:'bajievr'
         }
     },
-    output : path.join(demoPath,'..','output',new Date().getTime().toString()),
+    output : path.join(demoPath,'..','output','test'),
     project: path.join(demoPath,'app.zip'),
     plugins: {
         path : path.join(demoPath,'plugins.rar'),

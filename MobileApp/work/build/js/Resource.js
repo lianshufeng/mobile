@@ -15,20 +15,41 @@ function getTargetPath(target, name) {
 }
 
 //通用更新图标
-generalIcon = function(icon, path, resInfo) {
+var generalIcon = function(icon, path, resInfo) {
     var info = "";
     for (key in resInfo) {
         info += resInfo[key].size + "," + resInfo[key].name + ":";
     }
     try {
-
         javaUtil.call("ImageConvert.groovy", [icon, path, info]);
+    } catch(e) {
+        console.log(e);
+    }
+}
 
+
+//启动图片处理
+var generalLaunchImage = function(config, path, resInfo){
+    var backgroup = config.app.launch.backgroup;
+    var scale = config.app.launch.scale+'';
+    var icon = config.app.launch.icon;
+    if(typeof(backgroup) == 'number'){
+       backgroup = '#'+backgroup.toString(16);
+    }
+    var info = "";
+    for (key in resInfo) {
+        info += resInfo[key].size + "," + resInfo[key].name + ":";
+    }
+    try {
+        javaUtil.call("MakeLaunchImage.groovy", [backgroup , scale , icon , path, info]);
     } catch(e) {
         console.log(e);
     }
 
+
 }
+
+
 
 //处理配置文件
 var navigation = function(config, content) {
@@ -136,7 +157,7 @@ android = function(config) {
         return;
     }
 
-    //icon资源处理--开始
+    //Android资源处理--开始
     var images = new Array();
     var resPath = targetPaht + 'res/';
     var resList = scanFile.scan(resPath);
@@ -154,7 +175,6 @@ android = function(config) {
   
     
     //修改启动图片
-    var launchImagePath =  path.join(__dirname,'..','resources','DefaultLaunchImage.png');
     images = new Array();
     resPath = targetPaht + 'res/';
     resList = scanFile.scan(resPath);
@@ -167,7 +187,7 @@ android = function(config) {
             });
         }
     }
-    generalIcon(launchImagePath, resPath, images);
+    generalLaunchImage(config, resPath, images);
     
     
     
@@ -211,9 +231,9 @@ ios = function(config) {
     }
     generalIcon(icon, resPath, images);
     
+    
     //处理启动画面
     //默认的图片位置
-    var launchImagePath =  path.join(__dirname,'..','resources','DefaultLaunchImage.png');
     resPath = targetPaht + name + '/Images.xcassets/LaunchImage.launchimage/';
     //icon资源处理--开始
     images = new Array();
@@ -227,7 +247,7 @@ ios = function(config) {
             });
         }
     }
-    generalIcon(launchImagePath, resPath, images);
+    generalLaunchImage(config, resPath, images);
     
     
     

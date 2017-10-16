@@ -30,6 +30,10 @@ var generalIcon = function(icon, path, resInfo) {
 
 //启动图片处理
 var generalLaunchImage = function(config, path, resInfo){
+    if (!config.app.launch ){
+        console.log('跳过处理启动界面资源');
+        return ;
+    }
     var backgroup = config.app.launch.backgroup;
     var scale = config.app.launch.scale+'';
     var icon = config.app.launch.icon;

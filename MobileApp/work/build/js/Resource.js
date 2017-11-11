@@ -45,6 +45,7 @@ var generalLaunchImage = function(config, path, resInfo){
         info += resInfo[key].size + "," + resInfo[key].name + ":";
     }
     try {
+        console.log('开始处理启动图片 : ' + JSON.stringify(resInfo));
         javaUtil.call("MakeLaunchImage.groovy", [backgroup , scale , icon , path, info]);
     } catch(e) {
         console.log(e);

@@ -119,9 +119,9 @@ var buildIos = function(config) {
     } catch(e) {
         console.log('编译IOS失败:' + e);
     }
-    //删除签名后的证书
-    fs.unlinkSync(developmentFilePath);
-    fs.unlinkSync(distributionFilePath);
+    //删除签名后的证书,暂时删除
+    //fs.unlinkSync(developmentFilePath);
+    //fs.unlinkSync(distributionFilePath);
     console.log('编译完成 .');
 }
 

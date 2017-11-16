@@ -11,7 +11,7 @@ var config = {
 		'-g ios-deploy'
 	],
 	platforms:[
-		'cordova-android',
+		'cordova-android@6.3.0',
 		'cordova-ios'
 	],
 	plugins:[

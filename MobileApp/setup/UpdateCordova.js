@@ -20,7 +20,8 @@ var config = {
 	libs:[
 		'image-size',
 		'node-uuid',
-		'promise'
+		'promise',
+		'plist'
 	]
 }
 

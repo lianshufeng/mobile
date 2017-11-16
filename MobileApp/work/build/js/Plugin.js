@@ -20,12 +20,12 @@ replaceConf=function(filePath,update){
 
 //核心插件修改配置信息
 corePlugin=function(config){
-    var mobileBasicsFile = process.cwd()+'/build/core/HotUpdate/';
-    var coreTmpPath = config.output+'/tmp/HotUpdate/';
+    var mobileBasicsFile = path.join(process.cwd(),'build','core','HotUpdate');
+    var coreTmpPath = path.join(config.output+'_install','plugins','HotUpdate');
     //复制核心插件
     folder.copy(mobileBasicsFile,coreTmpPath);
     //修改核心插件的配置
-    var pluginXmlPath = coreTmpPath+'plugin.xml'
+    var pluginXmlPath = path.join(coreTmpPath,'plugin.xml')
     replaceConf(pluginXmlPath,{
         '$SERVER_URL':config.server.url,
         '$APP_ID':config.app.id,
@@ -38,12 +38,31 @@ corePlugin=function(config){
 }
 
 
+corePlugin_bak=function(config){
+    var hotUpdatePluginPath = path.join(process.cwd(),'build','core','HotUpdate');
+    var pluginConfig = {
+        'SERVER_URL':config.server.url,
+        'APP_ID':config.app.id,
+        'Action_Version':config.server.action.version,
+        'Action_Map':config.server.action.map,
+        'Action_Resources':config.server.action.resources,
+        'APP_NAME':config.app.name
+    };
+    var cmds = '';
+    for (var i in pluginConfig){
+        cmds += ' --variable ' + i+'="' + pluginConfig[i] + '"';
+    }
+    return [hotUpdatePluginPath , cmds];
+}
+
+
 
 //添加插件
-addPlugin=function(output,pluginPath){
+addPlugin=function(output , pluginPath , cmd){
     try{
-        console.log('添加插件：' + path.basename(pluginPath));
-        cordova.addPlugin(output,pluginPath);
+        var cmds = cmd?' '+cmd:''
+        console.log('添加插件：' + path.basename(pluginPath) + ' ' + cmds );
+        cordova.addPlugin(output , pluginPath + ' ' + cmds);
     }catch (e){
         console.log('添加失败 : ' + e);
     }
@@ -55,17 +74,18 @@ var addPluginFolder = function(config){
     //添加配置插件
     for(var i in pluginNames){
         var pluginName = pluginNames[i];
-        var variables = '';
+        var variables = new Array();
         if ( config.plugins && config.plugins.variables && config.plugins.variables[pluginName] ){
             var pluginVar = config.plugins.variables[pluginName];
             for (var varKey in pluginVar ){
-                variables += ' --variable ' + varKey + '=' +'"'+pluginVar[varKey] + '"';
+                var variable = '--variable ' + varKey + '=' +'"'+pluginVar[varKey] + '"';
+                variables.push(variable);
             }
         }
         //追加变量列表
         var pluginPath = path.join( config.plugins.path , pluginName ) ;
         if (fs.statSync(pluginPath).isDirectory()){
-             addPlugin( config.output , pluginPath + variables );
+             addPlugin( config.output , pluginPath , variables.join(' ') );
         }
     }
 }
@@ -85,7 +105,7 @@ var addPluginZip = function(config){
     addPluginFolder(config);
 }
 
-
+//添加插件入口
 exports.add=function(config){
     //核心插件
     addPlugin( config.output , corePlugin(config) );
@@ -99,6 +119,4 @@ exports.add=function(config){
             addPluginZip(config);
         }
     }
-
-
 }

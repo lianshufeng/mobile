@@ -3,6 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var folder = require('./Folder');
 var urlUtil = require('./UrlUtil');
+var scanFileList = require('./ScanFileList');
 
 //取出目标平台的路径
 function getTargetPath(target, name) {
@@ -82,12 +83,16 @@ var androidPackage = function(config) {
     var targetPath = getBuildPath(config);
     var buildPath = path.join(platformsPath,'build','outputs','apk');
     //按照顺序优先拷贝签名过的
-    var apkFileName = ['android-armv7-debug.apk', 'android-armv7-release.apk', 'android-debug.apk', 'android-release.apk']
-    for (var i in apkFileName) {
-        var apkFile = path.join(buildPath , apkFileName[i]);
+    var apkFileName = ['android-armv7-debug.apk', 'android-armv7-release.apk', 'android-debug.apk', 'android-release.apk'];
+    var buildPathFiles = scanFileList.scan(buildPath);
+    for ( var i in buildPathFiles ){
+        var apkFile = path.join(buildPath , buildPathFiles[i]);
         if (fs.existsSync(apkFile)) {
-            copyFile(apkFile, path.join(targetPath , config.app.name + '.apk'));
-            break;
+            var apkBaseName = path.basename(apkFile);
+            if ( apkFileName.indexOf(apkBaseName) > -1 ){
+                copyFile(apkFile, path.join(targetPath , config.app.name + '.apk'));
+                break;
+            }
         }
     }
 }

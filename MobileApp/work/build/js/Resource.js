@@ -4,6 +4,7 @@ var javaUtil = require('./JavaUtil');
 var stringUtil = require('./StringUtil');
 var scanFile = require('./ScanFileList');
 var sizeOf = require('../nodejs/node_modules/image-size');
+var plist = require('../nodejs/node_modules/plist');
 var path = require('path');
 
 //资源列表的名称
@@ -45,7 +46,7 @@ var generalLaunchImage = function(config, path, resInfo){
         info += resInfo[key].size + "," + resInfo[key].name + ":";
     }
     try {
-        console.log('开始处理启动图片 : ' + JSON.stringify(resInfo));
+        //console.log('开始处理启动图片 : ' + JSON.stringify(resInfo));
         javaUtil.call("MakeLaunchImage.groovy", [backgroup , scale , icon , path, info]);
     } catch(e) {
         console.log(e);
@@ -234,7 +235,13 @@ ios = function(config) {
             });
         }
     }
+    
+    //xcode9新规范，必须用一张1024的icon格式为png的
+    appendIcon1024ToIos(icon, resPath);
+    
+    //通用处理icon
     generalIcon(icon, resPath, images);
+    
     
     
     //处理启动画面
@@ -254,8 +261,6 @@ ios = function(config) {
     }
     generalLaunchImage(config, resPath, images);
     
-    
-    
     //icon资源处理--结束
     //生成资源的文件列表--开始
     var allRes = scanFile.scan( path.join( targetPaht , 'www' ) );
@@ -264,4 +269,88 @@ ios = function(config) {
     var AssetsFilePath = path.join(targetPaht,name,'Resources',name,'Resources',AssetsListName);
     fs.writeFileSync(AssetsFilePath, JSON.stringify(webResList));
     //生成资源的文件列表--结束
+    
+    
+    //修改权限列表
+    updateIosAuth(config);
+}
+
+
+//修改IOS的权限列表
+var updateIosAuth = function(config){
+    var target = config.output,
+    icon = config.app.icon,
+    name = config.app.name,
+    targetPaht = getTargetPath(target, 'ios');
+
+    //-Info.plist
+    var infoPlistFilePath = path.join( targetPaht , name , name + '-Info.plist' );
+    var pListContent = fs.readFileSync(infoPlistFilePath,'UTF-8').toString();
+    var plistContent = plist.parse(pListContent);
+    
+    //<!-- 相册 --> 
+    plistContent['NSPhotoLibraryUsageDescription'] = 'App需要您的同意,才能访问相册';
+    //<!-- 相机 --> 
+    plistContent['NSCameraUsageDescription'] = 'App需要您的同意,才能访问相机';
+    //<!-- 麦克风 -->
+    plistContent['NSMicrophoneUsageDescription'] = 'App需要您的同意,才能访问麦克风';
+    //<!-- 位置 -->
+    plistContent['NSLocationUsageDescription'] = 'App需要您的同意,才能访问位置';
+    //<!-- 在使用期间访问位置 NSLocationWhenInUseUsageDescription 
+    plistContent['NSPhotoLibraryUsageDescription'] = 'App需要您的同意,才能在使用期间访问位置';
+    //<!-- 始终访问位置 --> 
+    plistContent['NSLocationAlwaysUsageDescription'] = 'App需要您的同意,才能始终访问位置';
+    //<!-- 日历 --> 
+    plistContent['NSCalendarsUsageDescription'] = 'App需要您的同意,才能访问日历';
+    //<!-- 提醒事项 --> 
+    plistContent['NSRemindersUsageDescription'] = 'App需要您的同意,才能访问提醒事项';
+    //<!-- 运动与健身 --> 
+    plistContent['NSMotionUsageDescription'] = 'App需要您的同意,才能访问运动与健身';
+    //<!-- 健康更新 -->
+    plistContent['NSHealthUpdateUsageDescription'] = 'App需要您的同意,才能访问健康更新';
+    //<!-- 健康分享 --> 
+    plistContent['NSHealthShareUsageDescription'] = 'App需要您的同意,才能访问健康分享';
+     //<!-- 蓝牙 --> 
+    plistContent['NSBluetoothPeripheralUsageDescription'] = 'App需要您的同意,才能访问蓝牙';
+     //<!-- 媒体资料库 --> 
+    plistContent['NSAppleMusicUsageDescription'] = 'App需要您的同意,才能访问媒体资料库';
+    
+    //保存
+    fs.writeFileSync(infoPlistFilePath, plist.build(plistContent),'UTF-8');
+}
+
+
+//xcode9新规范，必须用一张1024的icon格式为png的
+var appendIcon1024ToIos = function(icon, resPath){
+    var icon1024FileName = 'icon-1024.png';
+    var icon1024px = 1024;
+    var images =[ {"name": icon1024FileName,'size': icon1024px+'_'+icon1024px } ];
+    //处理icon
+    generalIcon(icon, resPath, images);
+    //追加到配置文件中
+    appendIConToFile( path.join( resPath , 'Contents.json' ) , icon1024FileName,icon1024px);
+}
+
+
+//追加Icon文件到配置文件中
+var appendIConToFile = function( contentsFilePath , iconFileName , iconpx ){
+    var content =JSON.parse(fs.readFileSync( contentsFilePath ));
+    var images = content['images'];
+    var needAdd = true;
+    for (var i in images){
+        var image = images[i];
+        if (image && image['idiom'] == 'ios-marketing' ){
+            needAdd = false;
+            break;
+        }
+    }
+    if (needAdd){
+        content['images'].push({
+          "size" : iconpx+"x"+iconpx,
+          "idiom" : "ios-marketing",
+          "filename" : iconFileName,
+          "scale" : "1x"
+        });
+        fs.writeFileSync(contentsFilePath, JSON.stringify(content));
+    }
 }

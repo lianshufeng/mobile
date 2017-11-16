@@ -31,6 +31,15 @@ id="com.zbj.mobile.hotupdate" version="0.0.1">
     </js-module>
     -->
     
+    <!-- 接收参数 -->
+    <!--
+    <preference name="SERVER_URL" default=""/>
+    <preference name="APP_ID" default=""/>
+    <preference name="Action_Version" default=""/>
+    <preference name="Action_Map" default=""/>
+    <preference name="Action_Resources" default=""/>
+    <preference name="APP_NAME" default=""/>
+    -->
     
     <!--android-->
     <platform name="android">
@@ -154,6 +163,7 @@ id="com.zbj.mobile.hotupdate" version="0.0.1">
                 <string>$Action_Resources</string>
             </dict>
         </config-file>
+         
         
         <!-- 编译之前修改程序入口 -->
         <hook type="after_plugin_install" src="hooks/ios/UpdateDefaultMain.js"/>

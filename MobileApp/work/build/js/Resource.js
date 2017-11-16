@@ -296,8 +296,8 @@ var updateIosAuth = function(config){
     plistContent['NSMicrophoneUsageDescription'] = 'App需要您的同意,才能访问麦克风';
     //<!-- 位置 -->
     plistContent['NSLocationUsageDescription'] = 'App需要您的同意,才能访问位置';
-    //<!-- 在使用期间访问位置 NSLocationWhenInUseUsageDescription 
-    plistContent['NSPhotoLibraryUsageDescription'] = 'App需要您的同意,才能在使用期间访问位置';
+    //<!-- 在使用期间访问位置 --> 
+    plistContent['NSLocationWhenInUseUsageDescription'] = 'App需要您的同意,才能在使用期间访问位置';
     //<!-- 始终访问位置 --> 
     plistContent['NSLocationAlwaysUsageDescription'] = 'App需要您的同意,才能始终访问位置';
     //<!-- 日历 --> 

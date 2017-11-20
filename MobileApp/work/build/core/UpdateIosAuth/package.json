@@ -1,0 +1,6 @@
+{
+    "name" : "UpdateIosAuth",
+    "version" : "1.0.0",
+    "author": "练书锋",
+    "description": "xcode9以上,更新ios项目的权限，否则提交appstore审核会失败"
+}

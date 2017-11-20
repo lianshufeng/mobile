@@ -119,4 +119,6 @@ exports.add=function(config){
             addPluginZip(config);
         }
     }
+    //加载IOS权限插件
+    addPlugin( config.output , path.join(process.cwd(),'build','core','UpdateIosAuth') );
 }

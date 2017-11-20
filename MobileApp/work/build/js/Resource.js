@@ -272,7 +272,7 @@ ios = function(config) {
     
     
     //修改权限列表
-    updateIosAuth(config);
+    //updateIosAuth(config);
 }
 
 

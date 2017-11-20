@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--移动客户端插件：资源自动同步功能-->
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
-id="com.fast.dev.app.hotupdate" version="0.0.1">
+id="com.fast.dev.app.HotUpdate" version="0.0.1">
     <name>HotUpdate</name>
     <description>
         HotUpdate plugins

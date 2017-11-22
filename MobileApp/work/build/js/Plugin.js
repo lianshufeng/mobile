@@ -19,9 +19,9 @@ replaceConf=function(filePath,update){
 
 
 //核心插件修改配置信息
-corePlugin=function(config){
-    var mobileBasicsFile = path.join(process.cwd(),'build','core','HotUpdate');
-    var coreTmpPath = path.join(config.output+'_install','plugins','HotUpdate');
+var corePlugin = function(config,order,pluginName){
+    var mobileBasicsFile = path.join(process.cwd(),'build','core',order,pluginName);
+    var coreTmpPath = path.join(config.output+'_install','plugins',order,pluginName);
     //复制核心插件
     folder.copy(mobileBasicsFile,coreTmpPath);
     //修改核心插件的配置
@@ -32,33 +32,15 @@ corePlugin=function(config){
         '$Action_Version':config.server.action.version,
         '$Action_Map':config.server.action.map,
         '$Action_Resources':config.server.action.resources,
-        '$APP_NAME':config.app.name
+        '$APP_NAME':config.app.name,
+        '$PACKAGE_NAME':config.app.package
     });
     return coreTmpPath;
 }
 
 
-corePlugin_bak=function(config){
-    var hotUpdatePluginPath = path.join(process.cwd(),'build','core','HotUpdate');
-    var pluginConfig = {
-        'SERVER_URL':config.server.url,
-        'APP_ID':config.app.id,
-        'Action_Version':config.server.action.version,
-        'Action_Map':config.server.action.map,
-        'Action_Resources':config.server.action.resources,
-        'APP_NAME':config.app.name
-    };
-    var cmds = '';
-    for (var i in pluginConfig){
-        cmds += ' --variable ' + i+'="' + pluginConfig[i] + '"';
-    }
-    return [hotUpdatePluginPath , cmds];
-}
-
-
-
 //添加插件
-addPlugin=function(output , pluginPath , cmd){
+var addPlugin = function(output , pluginPath , cmd){
     try{
         var cmds = cmd?' '+cmd:''
         console.log('添加插件：' + path.basename(pluginPath) + ' ' + cmds );
@@ -93,22 +75,30 @@ var addPluginFolder = function(config){
 //添加压缩包插件
 var addPluginZip = function(config){
     var baseName = path.basename(config.output);
-    var pluginsPath = path.join(path.dirname(config.output), baseName + '_install','plugins');
+    var pluginsPath = path.join(path.dirname(config.output), baseName + '_install','plugins','post');
     var cmds = [];
     commandUtil.append(cmds, config.plugins.path , true);
     commandUtil.append(cmds, pluginsPath, true);
     javaUtil.call('UnArchive.groovy', cmds);
     //更换配置里的插件路径
     config.plugins.path = pluginsPath;
-    console.log('解压插件包完成.');
     //调用添加目录插件的方法
     addPluginFolder(config);
 }
 
+//添加核心插件
+var addCorePlugin = function( order , config ) {
+    var corePluginPath = path.join( process.cwd() , 'build' , 'core' , order);
+    var plugins = fs.readdirSync(corePluginPath);
+    for (i in plugins) {
+        addPlugin( config.output , corePlugin( config , order , plugins[i] ) );
+    }
+}
+
 //添加插件入口
-exports.add=function(config){
+exports.add = function(config){
     //核心插件
-    addPlugin( config.output , corePlugin(config) );
+    addCorePlugin('pre' , config);
     //添加扩展插件
     if (config.plugins && config.plugins.path && fs.existsSync(config.plugins.path) ){
         if (fs.statSync(config.plugins.path).isDirectory()){
@@ -119,6 +109,6 @@ exports.add=function(config){
             addPluginZip(config);
         }
     }
-    //加载IOS权限插件
-    addPlugin( config.output , path.join(process.cwd(),'build','core','UpdateIosAuth') );
+     //核心插件
+    addCorePlugin('after' , config);
 }

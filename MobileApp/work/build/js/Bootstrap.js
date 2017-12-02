@@ -30,8 +30,115 @@ return ;
 configPath = fs.realpathSync(configPath);
 //读取配置文件
 var config = require(configPath);
+
 //打印配置
 console.log(config);
+
+//自定义进度promise
+class ProcessExecutor extends Promise {
+    //构造方法
+    constructor(fun){
+        super(fun);
+    }
+    
+    //异步下一个方法
+    then(fun){
+        return super.then(fun);
+    }
+    
+}
+
+
+//程序入口
+var build = function () {
+    return new ProcessExecutor(function(resolve, reject){
+        if (!fs.existsSync(config.output)){
+            buildProject().
+            then(updateVersion).
+            then(addPlatform).
+            then(addPlugin).
+            then(function(){
+                resolve();
+            })
+        }else{
+            resolve();
+        }
+    });
+}
+
+//创建项目
+var buildProject = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        platform.projects(config);
+        resolve();
+    });
+}
+
+//更新版本号
+var updateVersion = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        resource.updateConfig(config);
+        resolve();
+    });
+}
+
+//添加平台
+var addPlatform = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        platform.add(config);
+        resolve();
+    });
+}
+
+//添加插件
+var addPlugin = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        plugin.add(config);
+        resolve();
+    });
+}
+
+
+//更新资源
+var updateResource = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        resource.platform(config);
+        resolve();
+    });
+}
+
+
+//编译app
+var buildApp = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        platform.build(config);
+        resolve();
+    });
+}
+
+
+//打包app
+var packageApp = function(){
+    return new ProcessExecutor(function(resolve, reject){
+        require('./PackageHelper').export(config);
+        resolve();
+    });
+}
+
+
+
+build().
+then(updateResource).
+then(buildApp).
+then(packageApp)
+;
+
+
+
+
+
+
+/**
 
 //文件存在
 if ( !fs.existsSync(config.output) ){
@@ -57,7 +164,7 @@ platform.build(config);
 //打包
 require('./PackageHelper').export(config);
 
-
+**/
 
 
  

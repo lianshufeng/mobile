@@ -1,0 +1,18 @@
+{
+  "name": "MobileAppLibs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall" : "npm install -g ios-deploy"
+  },
+  "dependencies": {
+    "cordova":"*",
+    "cordova-android":"6.3.0",
+    "cordova-ios":"*",
+    "cordova-plugin-whitelist":"*",
+    "image-size":"*",
+    "node-uuid":"*",
+    "promise":"*",
+    "plist":"*"
+  }
+}

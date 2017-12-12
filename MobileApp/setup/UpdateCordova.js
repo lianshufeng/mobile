@@ -1,6 +1,9 @@
 var path = require('path'),
-    exec = require("child_process").execSync,
-    fs = require('fs');
+    os = require('os'),
+    exec = require("child_process").exec,
+    fs = require('fs'),
+    spawn = require('child_process').spawn;
+    
 
 //nodejs的安装目录
 var node_modules_path =  path.join(__dirname,'..','work','build','nodejs');
@@ -53,6 +56,7 @@ var main = function(){
     if (!fs.existsSync(node_modules_path)){
         fs.mkdir(node_modules_path);
     }
+    /**
 	console.log('开始更新核心模块');
 	installArray(config.core);
 	console.log('开始更新平台模块');
@@ -61,6 +65,34 @@ var main = function(){
 	installArray(config.plugins);
 	console.log('开始更新支持库模块');
 	installArray(config.libs);
+	**/
+	
+
+    var npmPath = path.join(path.dirname(process.execPath),'npm');;
+    if (os.platform().indexOf('win') > -1){
+        npmPath = npmPath+".cmd"
+    }
+    
+	var install = spawn( npmPath , ['install'] ,{'cwd': node_modules_path});
+	install.stdout.on('data', function (data) {
+        console.log(data.toString());
+    });
+
+    // 捕获标准错误输出并将其打印到控制台
+    install.stderr.on('data', function (data) {
+        console.error(data.toString());
+    });
+
+    // 注册子进程关闭事件
+    install.on('exit', function (code, signal) {
+        console.log('finish');
+    });
+	
+	/**
+	exec('npm install', {cwd: node_modules_path}, function (error, stdout, stderr) {
+        console.log(stdout);
+    });
+    **/
 }
 
 main();

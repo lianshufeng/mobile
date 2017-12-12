@@ -69,7 +69,7 @@ var main = function(){
 	
 
     var npmPath = path.join(path.dirname(process.execPath),'npm');;
-    if (os.platform().indexOf('win') > -1){
+    if (fs.existsSync(npmPath+'.cmd')){
         npmPath = npmPath+".cmd"
     }
     

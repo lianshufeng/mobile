@@ -12,7 +12,7 @@ replaceConf=function(filePath,update){
     var data = fs.readFileSync(filePath);
     var buf = data.toString() ;
     for(var key in update){
-        buf=buf.split(key).join(update[key]);
+        buf=buf.split('$'+key).join(update[key]);
     }
     fs.writeFileSync(filePath,buf);
 }
@@ -27,13 +27,13 @@ var corePlugin = function(config,order,pluginName){
     //修改核心插件的配置
     var pluginXmlPath = path.join(coreTmpPath,'plugin.xml')
     replaceConf(pluginXmlPath,{
-        '$SERVER_URL':config.server.url,
-        '$APP_ID':config.app.id,
-        '$Action_Version':config.server.action.version,
-        '$Action_Map':config.server.action.map,
-        '$Action_Resources':config.server.action.resources,
-        '$APP_NAME':config.app.name,
-        '$PACKAGE_NAME':config.app.package
+        'SERVER_URL':config.server.url,
+        'APP_ID':config.app.id,
+        'Action_Version':config.server.action.version,
+        'Action_Map':config.server.action.map,
+        'Action_Resources':config.server.action.resources,
+        'APP_NAME':config.app.name,
+        'PACKAGE_NAME':config.app.package
     });
     
     

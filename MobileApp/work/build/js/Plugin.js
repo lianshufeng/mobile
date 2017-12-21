@@ -35,6 +35,15 @@ var corePlugin = function(config,order,pluginName){
         '$APP_NAME':config.app.name,
         '$PACKAGE_NAME':config.app.package
     });
+    
+    
+    //修改配置
+    var usageDescription = config['usageDescription']  ; 
+    if ( usageDescription ){
+        replaceConf(pluginXmlPath,usageDescription);
+    }
+    
+    
     return coreTmpPath;
 }
 

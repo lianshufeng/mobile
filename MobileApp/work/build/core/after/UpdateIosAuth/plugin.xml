@@ -11,55 +11,56 @@
   <platform name="ios"> 
     <!-- 相册 -->  
     <config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription"> 
-      <string>App需要您的同意,才能访问相册</string> 
+      <string>$NSPhotoLibraryUsageDescription</string> 
     </config-file>  
     <!-- 相机 -->  
     <config-file target="*-Info.plist" parent="NSCameraUsageDescription"> 
-      <string>App需要您的同意,才能访问相机</string> 
+      <string>$NSCameraUsageDescription</string> 
     </config-file>  
     <!-- 麦克风 -->  
     <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription"> 
-      <string>App需要您的同意,才能访问麦克风</string> 
+      <string>$NSMicrophoneUsageDescription</string> 
     </config-file>  
     <!-- 位置 -->  
     <config-file target="*-Info.plist" parent="NSLocationUsageDescription"> 
-      <string>App需要您的同意,才能访问位置</string> 
+      <string>$NSLocationUsageDescription</string> 
     </config-file>  
     <!-- 在使用期间访问位置 -->  
     <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription"> 
-      <string>App需要您的同意,才能在使用期间访问位置</string> 
+      <string>$NSLocationWhenInUseUsageDescription</string> 
     </config-file>  
     <!-- 始终访问位置 -->  
     <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription"> 
-      <string>App需要您的同意,才能始终访问位置</string> 
+      <string>$NSLocationAlwaysUsageDescription</string> 
     </config-file>  
     <!-- 日历 -->  
     <config-file target="*-Info.plist" parent="NSCalendarsUsageDescription"> 
-      <string>App需要您的同意,才能访问日历</string> 
+      <string>$NSCalendarsUsageDescription</string> 
     </config-file>  
     <!-- 提醒事项 -->  
     <config-file target="*-Info.plist" parent="NSRemindersUsageDescription"> 
-      <string>App需要您的同意,才能访问提醒事项</string> 
+      <string>$NSRemindersUsageDescription</string> 
     </config-file>  
     <!-- 运动与健身 -->  
     <config-file target="*-Info.plist" parent="NSMotionUsageDescription"> 
-      <string>App需要您的同意,才能访问运动与健身</string> 
+      <string>$NSMotionUsageDescription</string> 
     </config-file>  
     <!-- 健康更新 -->  
     <config-file target="*-Info.plist" parent="NSHealthUpdateUsageDescription"> 
-      <string>App需要您的同意,才能访问健康更新</string> 
+      <string>$NSHealthUpdateUsageDescription</string> 
     </config-file>  
     <!-- 健康分享 -->  
     <config-file target="*-Info.plist" parent="NSHealthShareUsageDescription"> 
-      <string>App需要您的同意,才能访问健康分享</string> 
+      <string>$NSHealthShareUsageDescription</string> 
     </config-file>  
     <!-- 蓝牙 -->  
     <config-file target="*-Info.plist" parent="NSBluetoothPeripheralUsageDescription"> 
-      <string>App需要您的同意,才能访问蓝牙</string> 
+      <string>$NSBluetoothPeripheralUsageDescription</string> 
     </config-file>  
     <!-- 媒体资料库 -->  
     <config-file target="*-Info.plist" parent="NSAppleMusicUsageDescription"> 
-      <string>App需要您的同意,才能访问媒体资料库</string>
+      <string>$NSAppleMusicUsageDescription</string>
     </config-file> 
+    
   </platform> 
 </plugin>

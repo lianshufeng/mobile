@@ -38,11 +38,11 @@ var corePlugin = function(config,order,pluginName){
     
     
     //修改配置
-    var usageDescription = config['usageDescription']  ; 
-    if ( usageDescription ){
-        replaceConf(pluginXmlPath,usageDescription);
+    var usageDescriptionMap = config.app['usageDescription']  ; 
+    if (usageDescriptionMap){
+        replaceConf(pluginXmlPath,usageDescriptionMap);
     }
-    
+   
     
     return coreTmpPath;
 }

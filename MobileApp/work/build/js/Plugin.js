@@ -7,8 +7,76 @@ commandUtil = require('./CommandUtil'),
 modulePath = process.cwd()+'/build/nodejs/node_modules/';
 
 
+//简单的拷贝对象
+var mergetObject = function ( objs ) {
+    var result = {};
+    //对象1
+    for ( var i in objs ) {
+        var obj = objs[i];
+        if (obj){
+            for (var key in obj){
+                result[key] = obj[key];
+            }
+        }
+    }
+    return result;
+}
+
+/**
+* 核心插件默认配置
+*/
+var coreDefaultPlugins = {
+    'HotUpdate': {
+        'SERVER_URL': null,
+        'APP_ID': null,
+        'APP_NAME': null,
+        'PACKAGE_NAME': null,
+        'Action_Version': '/HotUpdate/getVersion',
+        'Action_Map': '/HotUpdate/getMap',
+        'Action_Resources': '/HotUpdate/getRes'
+    },
+    'UpdateIosAuth': {
+        'NSPhotoLibraryUsageDescription': 'App需要您的同意,才能访问相册',
+        'NSCameraUsageDescription': 'App需要您的同意,才能访问相机',
+        'NSMicrophoneUsageDescription': 'App需要您的同意,才能访问麦克风',
+        'NSLocationUsageDescription': 'App需要您的同意,才能访问位置',
+        'NSLocationWhenInUseUsageDescription': 'App需要您的同意,才能在使用期间访问位置',
+        'NSLocationAlwaysUsageDescription': 'App需要您的同意,才能始终访问位置',
+        'NSCalendarsUsageDescription': 'App需要您的同意,才能访问日历',
+        'NSRemindersUsageDescription': 'App需要您的同意,才能访问提醒事项',
+        'NSMotionUsageDescription': 'App需要您的同意,才能访问运动与健身',
+        'NSHealthUpdateUsageDescription': 'App需要您的同意,才能访问健康更新',
+        'NSHealthShareUsageDescription': 'App需要您的同意,才能访问健康分享',
+        'NSBluetoothPeripheralUsageDescription': 'App需要您的同意,才能访问蓝牙',
+        'NSAppleMusicUsageDescription': 'App需要您的同意,才能访问媒体资料库'
+    }
+}
+
+
+/**
+*插件配置构造工厂
+*/
+var coreConfigPluginFactory = {
+    'HotUpdate':function(config,pluginPath){
+        var conf = {
+            'SERVER_URL':config.server.url,
+            'APP_ID':config.app.id,
+            'Action_Version':config.server.action.version,
+            'Action_Map':config.server.action.map,
+            'Action_Resources':config.server.action.resources,
+            'APP_NAME':config.app.name,
+            'PACKAGE_NAME':config.app.package
+        };
+        return mergetObject( [coreDefaultPlugins['HotUpdate'],conf] );
+    },
+    'UpdateIosAuth':function(config,pluginPath) {
+        return mergetObject( [ coreDefaultPlugins['UpdateIosAuth'] , config.app['usageDescription'] ]);
+    }
+}
+
+
 //替换配置信息
-replaceConf=function(filePath,update){
+var replaceConf=function(filePath,update){
     var data = fs.readFileSync(filePath);
     var buf = data.toString() ;
     for(var key in update){
@@ -17,15 +85,23 @@ replaceConf=function(filePath,update){
     fs.writeFileSync(filePath,buf);
 }
 
-
 //核心插件修改配置信息
-var corePlugin = function(config,order,pluginName){
-    var mobileBasicsFile = path.join(process.cwd(),'build','core',order,pluginName);
-    var coreTmpPath = path.join(config.output+'_install','plugins',order,pluginName);
+var corePlugin = function( config,order,pluginName ){
+    var mobileBasicsFile = path.join(process.cwd(),'build','core' , order , pluginName);
+    var pluginPath = path.join(config.output+'_install','plugins' , order , pluginName);    
     //复制核心插件
-    folder.copy(mobileBasicsFile,coreTmpPath);
+    folder.copy(mobileBasicsFile,pluginPath);
+    //合并用户配置参数
+    var userConfig = coreConfigPluginFactory[pluginName](config,pluginPath);
+    //插件配置路径
+    var pluginXmlPath = path.join(pluginPath,'plugin.xml');
+    //替换并保存插件
+    replaceConf(pluginXmlPath,userConfig);
+    
+    /**
     //修改核心插件的配置
-    var pluginXmlPath = path.join(coreTmpPath,'plugin.xml')
+    var pluginXmlPath = path.join(coreTmpPath,'plugin.xml');
+    //更换插件
     replaceConf(pluginXmlPath,{
         'SERVER_URL':config.server.url,
         'APP_ID':config.app.id,
@@ -37,14 +113,16 @@ var corePlugin = function(config,order,pluginName){
     });
     
     
+    
     //修改配置
     var usageDescriptionMap = config.app['usageDescription']  ; 
     if (usageDescriptionMap){
         replaceConf(pluginXmlPath,usageDescriptionMap);
     }
+    **/
    
     
-    return coreTmpPath;
+    return pluginPath;
 }
 
 

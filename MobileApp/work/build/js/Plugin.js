@@ -91,37 +91,15 @@ var corePlugin = function( config,order,pluginName ){
     var pluginPath = path.join(config.output+'_install','plugins' , order , pluginName);    
     //复制核心插件
     folder.copy(mobileBasicsFile,pluginPath);
-    //合并用户配置参数
-    var userConfig = coreConfigPluginFactory[pluginName](config,pluginPath);
-    //插件配置路径
-    var pluginXmlPath = path.join(pluginPath,'plugin.xml');
-    //替换并保存插件
-    replaceConf(pluginXmlPath,userConfig);
-    
-    /**
-    //修改核心插件的配置
-    var pluginXmlPath = path.join(coreTmpPath,'plugin.xml');
-    //更换插件
-    replaceConf(pluginXmlPath,{
-        'SERVER_URL':config.server.url,
-        'APP_ID':config.app.id,
-        'Action_Version':config.server.action.version,
-        'Action_Map':config.server.action.map,
-        'Action_Resources':config.server.action.resources,
-        'APP_NAME':config.app.name,
-        'PACKAGE_NAME':config.app.package
-    });
-    
-    
-    
-    //修改配置
-    var usageDescriptionMap = config.app['usageDescription']  ; 
-    if (usageDescriptionMap){
-        replaceConf(pluginXmlPath,usageDescriptionMap);
+    var func = coreConfigPluginFactory[pluginName];
+    if (func){
+        //合并用户配置参数
+        var userConfig = func(config,pluginPath);
+        //插件配置路径
+        var pluginXmlPath = path.join(pluginPath,'plugin.xml');
+        //替换并保存插件
+        replaceConf(pluginXmlPath,userConfig);
     }
-    **/
-   
-    
     return pluginPath;
 }
 

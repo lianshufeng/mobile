@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="com.fast.dev.app.UpdateIosLanguage" version="0.0.1">  
+  <name>UpdateIosLanguage</name>  
+  <description>UpdateIosLanguage plugins</description>  
+  <license>版权所有，违者必究</license>  
+  <keywords></keywords>  
+  <repo></repo>  
+  <issue></issue>  
+  <!-- 更新ios项目权限 -->  
+  <platform name="ios"> 
+    <!-- 媒体资料库 -->  
+    <config-file target="*-Info.plist" parent="CFBundleDevelopmentRegion"> 
+      <string>China</string>
+    </config-file> 
+    
+  </platform> 
+</plugin>

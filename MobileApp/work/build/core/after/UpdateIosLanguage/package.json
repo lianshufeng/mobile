@@ -1,0 +1,6 @@
+{
+    "name" : "UpdateIosLanguage",
+    "version" : "1.0.0",
+    "author": "练书锋",
+    "description": "修改xcode项目为中文，否则系统界面默认为因为操作"
+}

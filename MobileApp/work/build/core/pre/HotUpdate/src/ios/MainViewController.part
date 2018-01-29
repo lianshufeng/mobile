@@ -6,13 +6,13 @@
     //禁止下来出现空白
     super.webView.scrollView.bounces=NO;
     //空出状态栏
-    double OSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    if (OSVersion >= 7 && OSVersion < 11 ) {
-        CGRect viewBounds = [super.webView bounds];
-        viewBounds.origin.y = 20;
-        viewBounds.size.height = viewBounds.size.height - 20;
-        super.webView.frame = viewBounds;
-    }
+    //double OSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
+    //if (OSVersion >= 7 && OSVersion < 11 ) {
+    //    CGRect viewBounds = [super.webView bounds];
+    //    viewBounds.origin.y = 20;
+    //    viewBounds.size.height = viewBounds.size.height - 20;
+    //    super.webView.frame = viewBounds;
+    //}
     //弹出提示正在加载，防止ios8系统闪退APP的情况
     //[self showLoadTips:nil];
     //资源版本的检测
